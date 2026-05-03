@@ -1,10 +1,15 @@
 # Cortext
 
+[![Tests](https://github.com/ywkuno/cortext/actions/workflows/tests.yml/badge.svg)](https://github.com/ywkuno/cortext/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Local-first codebase maps, context slices, and visual replay for AI coding agents.
 
 Cortext turns a repository into an inspectable project graph before an assistant reads the whole tree. It maps files, symbols, imports, routes, docs, hierarchy, and activity events, then exports compact context packs that humans and agents can both inspect.
 
 The goal is simple: map first, query next, read raw files only when they matter.
+
+![Cortext brain map](docs/assets/cortext-brain-map.png)
 
 ## What It Does
 
@@ -44,18 +49,14 @@ pip install -e ".[dev]"
 ```bash
 contextopt init
 contextopt map .
-contextopt export --format md --out .contextopt/context-pack.md
-contextopt export --format json --out .contextopt/context-pack.json
-contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
-contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
-contextopt visualize --outdir .contextopt/visual
 contextopt stats
-contextopt query "Where is authentication handled?"
-contextopt slice auth --out .contextopt/slices/auth.md
-contextopt visualize --context .contextopt/slices/auth.json --outdir .contextopt/visual
+contextopt query "main"
+contextopt slice main --out .contextopt/slices/main.md
+contextopt visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
 ```
 
 Open `.contextopt/visual/index.html` in a browser to inspect the generated brain map.
+See [docs/demo.md](docs/demo.md) for the full activity replay and context-overlay walkthrough.
 
 ## Activity Replay
 
@@ -140,6 +141,10 @@ CI runs tests, Ruff, and a CLI smoke path across Python 3.10, 3.11, and 3.12.
 ## Roadmap
 
 Near-term work is focused on making the visual map more useful, improving slice ranking, and adding deeper static extraction without making the tool heavyweight. See `docs/roadmap.md` for the current plan.
+
+## Public Launch
+
+Use [docs/public-launch-checklist.md](docs/public-launch-checklist.md) before pushing or making the repository public.
 
 ## License
 
