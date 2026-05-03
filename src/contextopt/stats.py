@@ -74,7 +74,7 @@ def compute_stats(root: Path, store: GraphStore) -> dict[str, Any]:
 
 def format_stats(stats: dict[str, Any]) -> str:
     lines = [
-        "# Cortext Stats",
+        "# CodePrism Stats",
         "",
         f"- Root: `{stats['root']}`",
         f"- Mapped files: {stats['mapped_files']}",

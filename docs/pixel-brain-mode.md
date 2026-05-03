@@ -2,10 +2,10 @@
 
 ## MVP line
 
-- MVP1: Cortext maps repos and exports context.
-- MVP2: Cortext generates a usable visual brain map and can replay simple activity events.
+- MVP1: CodePrism maps repos and exports context.
+- MVP2: CodePrism generates a usable visual brain map and can replay simple activity events.
 - MVP3: Pixel Brain turns those events into animated replay with timeline controls, speed control, event list, lightweight marker movement, agent trails, and token counters.
-- MVP4: Cortext adds token statistics and targeted slices so replay stays paired with actual context savings.
+- MVP4: CodePrism adds token statistics and targeted slices so replay stays paired with actual context savings.
 
 ## The idea
 
@@ -30,7 +30,7 @@ It becomes a debugging / observability layer for agent workflows.
 ## Data inputs
 
 ### 1. Graph map
-Generated from Cortext:
+Generated from CodePrism:
 - nodes
 - edges
 - clusters

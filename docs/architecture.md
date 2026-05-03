@@ -4,7 +4,7 @@
 
 AI coding assistants waste context by repeatedly reading broad file trees. Large repos also hide important relationships: entrypoints, imports, call chains, routes, migrations, generated files, and where things live.
 
-Cortext creates a durable project map that agents can query before reading raw files.
+CodePrism creates a durable project map that agents can query before reading raw files.
 
 ## Pipeline
 

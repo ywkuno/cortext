@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an improvement for Cortext
+about: Suggest an improvement for CodePrism
 title: "[Feature]: "
 labels: enhancement
 assignees: ""

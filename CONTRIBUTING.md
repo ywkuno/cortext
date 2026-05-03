@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Cortext.
+Thanks for helping improve CodePrism.
 
 ## Development Setup
 
@@ -17,8 +17,8 @@ Run these before opening a pull request:
 ```bash
 pytest
 ruff check .
-contextopt map .
-contextopt export --format json --out .contextopt/context-pack.json
+codeprism map .
+codeprism export --format json --out .contextopt/context-pack.json
 ```
 
 Generated `.contextopt/` artifacts are local working files and should usually stay out of commits.

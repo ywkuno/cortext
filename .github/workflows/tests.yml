@@ -27,15 +27,16 @@ jobs:
         run: pytest
       - name: CLI smoke
         run: |
-          contextopt init
-          contextopt map .
-          contextopt export --format md --out .contextopt/context-pack.md
-          contextopt export --format json --out .contextopt/context-pack.json
-          contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
-          contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
-          contextopt visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
-          contextopt stats
-          contextopt slice main --out .contextopt/slices/main.md
-          contextopt visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
-          contextopt setup --target project
-          contextopt doctor --target project
+          contextopt --help
+          codeprism init
+          codeprism map .
+          codeprism export --format md --out .contextopt/context-pack.md
+          codeprism export --format json --out .contextopt/context-pack.json
+          codeprism activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
+          codeprism activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
+          codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
+          codeprism stats
+          codeprism slice main --out .contextopt/slices/main.md
+          codeprism visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
+          codeprism setup --target project
+          codeprism doctor --target project

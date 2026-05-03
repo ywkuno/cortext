@@ -6,6 +6,27 @@ import json
 from pathlib import Path
 
 
+def test_cli_help_uses_codeprism_as_public_name():
+    result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "usage: codeprism" in result.stdout
+    assert "CodePrism" in result.stdout
+
+
+def test_pyproject_exposes_codeprism_and_contextopt_console_scripts():
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    text = pyproject.read_text(encoding="utf-8")
+
+    assert 'codeprism = "contextopt.cli:main"' in text
+    assert 'contextopt = "contextopt.cli:main"' in text
+
+
 def test_init_writes_default_config(tmp_path: Path):
     result = subprocess.run(
         [sys.executable, "-m", "contextopt.cli", "init", "--root", str(tmp_path)],

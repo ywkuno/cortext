@@ -1,4 +1,4 @@
-# pixel-brain (future Cortext app)
+# pixel-brain (future CodePrism app)
 
 This folder is reserved for a future pixel / gamified renderer for agent activity.
 

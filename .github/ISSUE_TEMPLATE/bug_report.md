@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible Cortext issue
+about: Report a reproducible CodePrism issue
 title: "[Bug]: "
 labels: bug
 assignees: ""
@@ -22,7 +22,7 @@ assignees: ""
 
 - OS:
 - Python:
-- Cortext version or commit:
+- CodePrism version or commit:
 
 ## Logs or output
 

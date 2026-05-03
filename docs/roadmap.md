@@ -1,4 +1,4 @@
-# Cortext Roadmap
+# CodePrism Roadmap
 
 ## Milestone names
 
@@ -25,7 +25,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Better JS/TS parsing
 - Next.js route detector
 - Import graph visualization export
-- `contextopt query` ranking improvements
+- `codeprism query` ranking improvements
 - Context pack size budgets
 
 ## MVP2 — Visual Brain Map
@@ -75,22 +75,22 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Deterministic path interpolation between touched nodes
 - Short-lived activity trails between replayed source and target nodes
 - Replay HUD with event count, agent count, active event, and estimated tokens
-- Standalone `contextopt activity normalize` command for safe JSONL-to-replay payloads
+- Standalone `codeprism activity normalize` command for safe JSONL-to-replay payloads
 - Searchable event list for jumping to agents, event types, and paths
-- Safe tool-event adapter example via `contextopt activity adapt-tool-log`
+- Safe tool-event adapter example via `codeprism activity adapt-tool-log`
 - Run and agent filters, jump-to-node, and touched-only replay map mode
 - Context inclusion overlays
 - Pixel renderer scaffold in `apps/pixel-brain`
 
 ## MVP4 — Token Optimization
 
-- `contextopt stats` for source, graph, and context-pack token estimates
-- `contextopt slice <path-or-symbol>` for targeted Markdown context packs
-- `contextopt prime <task>` as the one-command agent preflight: map, estimate, slice, then read the slice first
-- `contextopt prime <task> --changed` seeds context from changed, staged, and untracked Git files
-- `contextopt prime <task> --artifact-dir <dir> --readonly-root` supports read-only repos and CI artifact routing
-- `contextopt setup` installs/refreshes agent helpers and runs `contextopt doctor`
-- `contextopt doctor` checks whether helper files are present and current
+- `codeprism stats` for source, graph, and context-pack token estimates
+- `codeprism slice <path-or-symbol>` for targeted Markdown context packs
+- `codeprism prime <task>` as the one-command agent preflight: map, estimate, slice, then read the slice first
+- `codeprism prime <task> --changed` seeds context from changed, staged, and untracked Git files
+- `codeprism prime <task> --artifact-dir <dir> --readonly-root` supports read-only repos and CI artifact routing
+- `codeprism setup` installs/refreshes agent helpers and runs `codeprism doctor`
+- `codeprism doctor` checks whether helper files are present and current
 - Prime output includes source, full-context, slice, estimated saving, file count, symbol count, and edge count
 - Slice JSON manifests for context-inclusion overlays
 - Viewer compares slice tokens against full graph context estimate
@@ -101,10 +101,10 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Broad deterministic fallback for common non-Python languages, with honest limitations
 - Honest estimated token reporting rather than benchmark claims
 - Next: rank slices by call graph signals, richer docs mentions, recent activity, and per-language ownership hints
-- Next: benchmark Cortext slices against full-source packs and other repo-packing tools using reproducible fixtures
-- Next: add exact source retrieval with `contextopt get`
-- Next: add token-aware read modes with `contextopt read --mode map|signatures|diff|full`
-- Next: expose prime/query/slice/get/read/stats through `contextopt mcp`
+- Next: benchmark CodePrism slices against full-source packs and other repo-packing tools using reproducible fixtures
+- Next: add exact source retrieval with `codeprism get`
+- Next: add token-aware read modes with `codeprism read --mode map|signatures|diff|full`
+- Next: expose prime/query/slice/get/read/stats through `codeprism mcp`
 
 ## Phase 5 — Agent integrations
 
@@ -113,7 +113,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Codex workflow prompts
 - Copilot instruction templates
 - VS Code task definitions
-- `contextopt install-integrations`
+- `codeprism install-integrations`
 - Project command for slice-first work: `/context-slice`
 
 ## Phase 6 — Advanced graph intelligence

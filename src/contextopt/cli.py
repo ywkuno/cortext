@@ -26,9 +26,21 @@ from .slicer import default_slice_path, export_slice
 from .stats import compute_stats, format_stats
 
 
+PUBLIC_CLI = "codeprism"
+LEGACY_CLI = "contextopt"
+
+
+def _program_name(argv0: str | None = None) -> str:
+    stem = Path(argv0 or sys.argv[0]).stem.lower()
+    if stem in {PUBLIC_CLI, LEGACY_CLI}:
+        return stem
+    return PUBLIC_CLI
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="contextopt", description="Map a codebase for AI context optimization."
+        prog=_program_name(),
+        description="CodePrism maps codebases into focused context slices for AI agents.",
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
     p_init = sub.add_parser("init", help="Create .contextopt config directory.")
@@ -93,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     p_visualize.add_argument("--context")
     p_setup = sub.add_parser(
         "setup",
-        help="Install Cortext agent integrations and verify them with doctor.",
+        help="Install CodePrism agent integrations and verify them with doctor.",
     )
     p_setup.add_argument("--root", default=".")
     p_setup.add_argument(
@@ -120,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     p_install.add_argument("--force", action="store_true")
     p_doctor = sub.add_parser(
         "doctor",
-        help="Check whether Cortext CLI and agent integrations are installed and current.",
+        help="Check whether CodePrism CLI and agent integrations are installed and current.",
     )
     p_doctor.add_argument("--root", default=".")
     p_doctor.add_argument(
@@ -141,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     p_activity_normalize.add_argument("--out", default=".contextopt/activity-stream.json")
     p_activity_adapt_tool = activity_sub.add_parser(
         "adapt-tool-log",
-        help="Convert a simple tool-event JSONL log into Cortext activity JSONL.",
+        help="Convert a simple tool-event JSONL log into CodePrism activity JSONL.",
     )
     p_activity_adapt_tool.add_argument("input")
     p_activity_adapt_tool.add_argument("--out", default=".contextopt/activity-events.jsonl")
@@ -212,7 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Wrote visualization to {html_path}")
         return 0
     if args.cmd == "setup":
-        print("Cortext Setup")
+        print("CodePrism Setup")
         print("")
         install_result = install_integrations(
             root=Path(args.root),
@@ -224,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         action = "Would install" if args.dry_run else "Installed"
         print(
-            f"{action} {install_result['planned']} Cortext integration files "
+            f"{action} {install_result['planned']} CodePrism integration files "
             f"({install_result['copied']} copied, {install_result['skipped']} skipped)."
         )
         for path in install_result["paths"]:
@@ -253,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         action = "Would install" if args.dry_run else "Installed"
         print(
-            f"{action} {result['planned']} Cortext integration files "
+            f"{action} {result['planned']} CodePrism integration files "
             f"({result['copied']} copied, {result['skipped']} skipped)."
         )
         for path in result["paths"]:
@@ -386,7 +398,7 @@ def _git_lines(root: Path, args: list[str]) -> list[str]:
 
 
 def _print_doctor_report(report: dict[str, object]) -> None:
-    print("Cortext Doctor")
+    print("CodePrism Doctor")
     print("")
     for item in report["items"]:
         if not isinstance(item, dict):
@@ -403,7 +415,7 @@ def _print_doctor_report(report: dict[str, object]) -> None:
             f"{summary.get('stale', 0)} stale."
         )
     if not report["ok"]:
-        print("Run `contextopt install-integrations --target all --force` to refresh helpers.")
+        print("Run `codeprism setup --target all` to refresh helpers.")
 
 
 def _resolve_optional_path(value: str | None) -> Path | None:

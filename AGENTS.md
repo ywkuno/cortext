@@ -2,7 +2,7 @@
 
 ## Project purpose
 
-This repo implements Cortext: a local-first codebase mapping tool that generates compact context packs, graph exports, and visual replay data for AI assistants.
+This repo implements CodePrism: a local-first codebase mapping tool that generates compact context packs, graph exports, and visual replay data for AI assistants.
 
 ## Ground rules for agents
 
@@ -19,13 +19,13 @@ This repo implements Cortext: a local-first codebase mapping tool that generates
 pip install -e ".[dev]"
 pytest
 ruff check .
-contextopt map .
-contextopt export --format md --out .contextopt/context-pack.md
-contextopt export --format json --out .contextopt/context-pack.json
-contextopt visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
-contextopt stats
-contextopt setup --target project
-contextopt doctor
+codeprism map .
+codeprism export --format md --out .contextopt/context-pack.md
+codeprism export --format json --out .contextopt/context-pack.json
+codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
+codeprism stats
+codeprism setup --target project
+codeprism doctor
 ```
 
 ## Architecture

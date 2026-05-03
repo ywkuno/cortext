@@ -1,21 +1,21 @@
 # Activity Stream Schema
 
 This schema is the MVP2 foundation for visual overlays and the MVP3 pixel-agent replay loop.
-The source log format is newline-delimited JSON (`.jsonl`). `contextopt visualize --activity <file>` normalizes valid rows into `.contextopt/visual/activity-stream.json` and records warnings for malformed rows.
+The source log format is newline-delimited JSON (`.jsonl`). `codeprism visualize --activity <file>` normalizes valid rows into `.contextopt/visual/activity-stream.json` and records warnings for malformed rows.
 
 You can also normalize an activity stream without generating a viewer:
 
 ```bash
-contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
+codeprism activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
 ```
 
-For simple tool-event logs, Cortext includes a conservative adapter example:
+For simple tool-event logs, CodePrism includes a conservative adapter example:
 
 ```bash
-contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
+codeprism activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
 ```
 
-The adapter accepts safe fields such as `agent`, `type`, `file`, `tokens`, and `duration_ms`, then emits Cortext activity JSONL. It does not read private session logs or infer hidden context.
+The adapter accepts safe fields such as `agent`, `type`, `file`, `tokens`, and `duration_ms`, then emits CodePrism activity JSONL. It does not read private session logs or infer hidden context.
 
 ## Base fields
 
@@ -36,7 +36,7 @@ Recommended event fields:
 - `severity` — optional severity such as `info`, `warn`, or `error`
 - `meta` — freeform object
 
-Only `event` is effectively required by the parser. Missing optional fields are normalized to empty strings or nulls so replay does not crash. Token fields are optional because Cortext should never need access to private session logs; integrations can pass normalized counts when they already have safe data.
+Only `event` is effectively required by the parser. Missing optional fields are normalized to empty strings or nulls so replay does not crash. Token fields are optional because CodePrism should never need access to private session logs; integrations can pass normalized counts when they already have safe data.
 
 ## Stable node ID examples
 
@@ -64,7 +64,7 @@ Only `event` is effectively required by the parser. Missing optional fields are 
 
 ### `context_pack_generated`
 ```json
-{"ts":"2026-05-03T02:02:00Z","run_id":"demo-1","agent_id":"cortext","event":"context_pack_generated","estimated_tokens":1400,"actual_tokens":1280,"meta":{"node_count":22,"edge_count":37}}
+{"ts":"2026-05-03T02:02:00Z","run_id":"demo-1","agent_id":"CodePrism","event":"context_pack_generated","estimated_tokens":1400,"actual_tokens":1280,"meta":{"node_count":22,"edge_count":37}}
 ```
 
 ### `test_run`
@@ -86,9 +86,9 @@ The visualizer writes a normalized JSON payload:
   - `actual_tokens`
   - `duration_ms`
 
-The standalone `contextopt activity normalize` command writes the same payload shape, which keeps adapters simple and avoids reading private agent session logs directly.
+The standalone `codeprism activity normalize` command writes the same payload shape, which keeps adapters simple and avoids reading private agent session logs directly.
 
-Activity replay can be combined with context overlays by running `contextopt visualize --activity <activity.jsonl> --context <slice.json>`. Activity events show what was touched; context overlays show what was packed.
+Activity replay can be combined with context overlays by running `codeprism visualize --activity <activity.jsonl> --context <slice.json>`. Activity events show what was touched; context overlays show what was packed.
 
 ## Future fields
 

@@ -1,4 +1,4 @@
-# brain-viz (future Cortext app)
+# brain-viz (future CodePrism app)
 
 This folder is reserved for a future polished visualization app.
 

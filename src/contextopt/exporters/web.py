@@ -11,12 +11,12 @@ HTML = """<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cortext Brain Map</title>
+  <title>CodePrism Brain Map</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <aside class="sidebar">
-    <h1>Cortext Brain Map</h1>
+    <h1>CodePrism Brain Map</h1>
     <p class="muted">Local project graph for agent context and visual inspection.</p>
     <section class="panel">
       <label for="search">Search</label>

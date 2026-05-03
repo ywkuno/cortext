@@ -1,6 +1,6 @@
-# Cortext Demo
+# CodePrism Demo
 
-This walkthrough shows the public context-saving loop for Cortext on any local repository. The visual map is included as an inspection bonus; the main path is slice-first.
+This walkthrough shows the public context-saving loop for CodePrism on any local repository. The visual map is included as an inspection bonus; the main path is slice-first.
 
 ## 1. Install
 
@@ -13,8 +13,8 @@ pip install -e ".[dev]"
 ## 2. Prime A Task
 
 ```bash
-contextopt init
-contextopt prime "main"
+codeprism init
+codeprism prime "main"
 ```
 
 This creates a local `.contextopt/context.db` SQLite graph and a focused `.contextopt/slices/main.md` file. Generated `.contextopt/` files are local working artifacts and should not be committed.
@@ -22,7 +22,7 @@ This creates a local `.contextopt/context.db` SQLite graph and a focused `.conte
 During an edit session, seed the slice with changed, staged, and untracked Git files:
 
 ```bash
-contextopt prime "current task" --changed
+codeprism prime "current task" --changed
 ```
 
 The command prints source, full-context, and slice token estimates plus an estimated saving percentage.
@@ -30,15 +30,15 @@ The command prints source, full-context, and slice token estimates plus an estim
 For a read-only checkout or a CI smoke run, keep artifacts outside the target repo:
 
 ```bash
-contextopt prime "current task" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
+codeprism prime "current task" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
 ```
 
-Replace `PATH_TO_REPO` and `PATH_TO_ARTIFACTS` with normal project and output paths for your machine. With `--readonly-root`, Cortext refuses to write generated artifacts under `--root`.
+Replace `PATH_TO_REPO` and `PATH_TO_ARTIFACTS` with normal project and output paths for your machine. With `--readonly-root`, CodePrism refuses to write generated artifacts under `--root`.
 
 ## 3. Review Token Estimates
 
 ```bash
-contextopt stats
+codeprism stats
 ```
 
 The stats command reports local estimated token counts for source, graph, and context-pack outputs. These are estimates for comparison, not benchmark claims.
@@ -46,11 +46,11 @@ The stats command reports local estimated token counts for source, graph, and co
 ## 4. Install Agent Helpers
 
 ```bash
-contextopt setup
-contextopt doctor
+codeprism setup
+codeprism doctor
 ```
 
-Restart Codex/Claude after installing global skills. The helpers tell agents to run `contextopt prime "<task>"` before broad file reads.
+Restart Codex/Claude after installing global skills. The helpers tell agents to run `codeprism prime "<task>"` before broad file reads.
 
 The prime/slice workflow writes:
 
@@ -60,16 +60,16 @@ The prime/slice workflow writes:
 ## 5. Replay Activity
 
 ```bash
-contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
-contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
+codeprism activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
+codeprism activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
 ```
 
-The adapter is intentionally simple and safe. It converts explicit tool-event rows into Cortext activity JSONL. It does not read private agent session logs.
+The adapter is intentionally simple and safe. It converts explicit tool-event rows into CodePrism activity JSONL. It does not read private agent session logs.
 
 ## 6. Open The Optional Viewer
 
 ```bash
-contextopt visualize \
+codeprism visualize \
   --activity examples/activity-stream.sample.jsonl \
   --context .contextopt/slices/main.json \
   --outdir .contextopt/visual
@@ -87,4 +87,4 @@ The viewer supports:
 
 ## Screenshot
 
-![Cortext brain map](assets/cortext-brain-map.png)
+![CodePrism brain map](assets/cortext-brain-map.png)

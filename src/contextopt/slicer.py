@@ -261,7 +261,7 @@ def export_slice(
     ]
 
     lines = [
-        "# Cortext Slice",
+        "# CodePrism Slice",
         "",
         f"- Query: `{query}`",
         f"- Matched nodes: {len(matched_ids)}",

@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cortext"
 version = "0.1.0"
-description = "Local-first context saving and token optimization for AI coding agents"
+description = "CodePrism: local-first context saving and token optimization for AI coding agents"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Cortext contributors" }]
+authors = [{ name = "CodePrism contributors" }]
 keywords = ["ai", "agents", "codebase", "context", "visualization"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -27,6 +27,7 @@ dependencies = []
 dev = ["pytest>=8.0", "ruff>=0.6.0", "mypy>=1.10"]
 
 [project.scripts]
+codeprism = "contextopt.cli:main"
 contextopt = "contextopt.cli:main"
 
 [tool.setuptools.packages.find]

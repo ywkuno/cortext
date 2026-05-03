@@ -1,6 +1,6 @@
-# Codex Prompt: Build Cortext
+# Codex Prompt: Build CodePrism
 
-You are working on Cortext, a local-first repo mapping tool for AI assistants.
+You are working on CodePrism, a local-first repo mapping tool for AI assistants.
 
 Start by running tests and CLI smoke commands. Then implement the next roadmap item from `docs/roadmap.md`.
 

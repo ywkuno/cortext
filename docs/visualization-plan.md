@@ -12,7 +12,7 @@
 Most context-optimization tools stop at “compress repo into machine-readable output”.
 That helps the AI, but not the human.
 
-We want a **human-readable Cortext brain map**:
+We want a **human-readable CodePrism brain map**:
 
 - understand repo shape at a glance
 - spot hotspots, giant files, isolated modules, and dependency tangles
@@ -115,8 +115,8 @@ For richer visualization we should add:
 - no animation work when paused
 
 ### Phase F — MVP4 token loop
-- `contextopt stats`
-- `contextopt slice <path-or-symbol>`
+- `codeprism stats`
+- `codeprism slice <path-or-symbol>`
 - query-first docs for agent workflows
 - slice JSON manifests loaded as `context-overlay.json`
 - highlighted context-included nodes in the viewer
@@ -149,8 +149,8 @@ Build a real app under `apps/brain-viz`:
 
 ## MVP acceptance criteria
 
-- `contextopt visualize` generates a folder with a browser-openable viewer
-- `contextopt visualize --activity examples/activity-stream.sample.jsonl` copies/normalizes activity data into the viewer folder
+- `codeprism visualize` generates a folder with a browser-openable viewer
+- `codeprism visualize --activity examples/activity-stream.sample.jsonl` copies/normalizes activity data into the viewer folder
 - viewer loads local graph JSON
 - user can pan, zoom, drag, search, filter, highlight, and inspect nodes
 - viewer can show the current activity event and highlight a touched node by `node_id` or `path`

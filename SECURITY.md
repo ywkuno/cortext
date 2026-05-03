@@ -1,6 +1,6 @@
 # Security Policy
 
-Cortext is local-first and does not make network calls by default.
+CodePrism is local-first and does not make network calls by default.
 
 ## Reporting Issues
 
@@ -12,4 +12,4 @@ The project is currently pre-1.0. Security fixes are made on the main developmen
 
 ## Handling Generated Data
 
-Cortext outputs may contain source paths, symbols, documentation headings, and other project metadata. Treat generated `.contextopt/` artifacts as project-sensitive unless you intentionally created them from a public repository.
+CodePrism outputs may contain source paths, symbols, documentation headings, and other project metadata. Treat generated `.contextopt/` artifacts as project-sensitive unless you intentionally created them from a public repository.

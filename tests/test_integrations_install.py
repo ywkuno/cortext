@@ -198,5 +198,5 @@ def test_setup_cli_installs_and_verifies_integrations(tmp_path: Path) -> None:
     assert (tmp_path / ".github" / "copilot-instructions.md").exists()
     assert (codex_home / "skills" / "cortext" / "SKILL.md").exists()
     assert (claude_home / "skills" / "cortext" / "SKILL.md").exists()
-    assert "Cortext Setup" in result.stdout
+    assert "CodePrism Setup" in result.stdout
     assert "Summary: 6 current, 0 missing, 0 stale." in result.stdout
