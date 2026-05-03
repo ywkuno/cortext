@@ -8,6 +8,10 @@
 - Added `codeprism get <node-id>` to print exact source for a mapped file, doc, or symbol node.
 - Added `codeprism read <path> --mode map|signatures|diff|full` for progressive, token-aware file reading.
 - Added `codeprism gain` to report estimated token savings and map freshness.
+- Added `codeprism references <node-id>` for incoming/outgoing graph references.
+- Added local `codeprism onboard` and `codeprism memory` commands for inspectable project memory.
+- Added `codeprism benchmark` plus a small reproducible benchmark fixture.
+- Added experimental MCP tool descriptors and optional MCP server entrypoint.
 - Improved slice ranking with tokenized/stemmed matching, local import expansion, changed-path seeds, and related test inclusion.
 - Added `codeprism install-integrations` for local Codex, Claude, and Copilot helpers.
 - Added project-level Claude commands, including `/context-slice`, and Copilot instructions for slice-first workflows.

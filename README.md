@@ -18,9 +18,10 @@ pip install -e ".[dev]"
 codeprism setup
 codeprism prime "server boot path"
 codeprism gain
+codeprism mcp --list-tools
 ```
 
-`codeprism setup` installs Codex/Claude/Copilot helper files and verifies them with `codeprism doctor`. `codeprism prime` maps the repo, writes a focused slice, and prints estimated token savings. `codeprism gain` reports estimated savings again later and warns when the map is stale.
+`codeprism setup` installs Codex/Claude/Copilot helper files and verifies them with `codeprism doctor`. `codeprism prime` maps the repo, writes a focused slice, and prints estimated token savings. `codeprism gain` reports estimated savings again later and warns when the map is stale. `codeprism mcp --list-tools` shows the MCP tools available to agent clients.
 
 The legacy `contextopt` command remains available for existing scripts while the public CLI moves to `codeprism`. Internal Python imports still use the `contextopt` package.
 
@@ -43,8 +44,11 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Runs `codeprism prime "<task>"` to map the repo and write a targeted slice in one step.
 - Fetches exact mapped source with `codeprism get <node-id>` so agents can inspect one symbol or file before opening broader code.
 - Reads files through token-aware modes with `codeprism read <path> --mode map|signatures|diff|full`.
+- Shows graph references with `codeprism references <node-id>`.
 - Estimates context size and creates targeted Markdown slices for focused work.
 - Reports estimated saved tokens and stale-map status with `codeprism gain`.
+- Writes local project memory with `codeprism onboard` and `codeprism memory`.
+- Produces reproducible savings reports with `codeprism benchmark`.
 - Routes generated artifacts outside a target repo with `--artifact-dir` and `--readonly-root`.
 - Exports Markdown, JSON, DOT, and static browser visualizations.
 - Generates stable graph data for tool integration and optional visual inspection.
@@ -59,6 +63,7 @@ The core loop is usable today:
 - map a repository into a local SQLite graph
 - estimate context size and generate focused slices
 - check whether the graph is stale before trusting map output
+- expose core context tools through an optional MCP server
 - install and verify Codex/Claude/Copilot helpers that nudge agents toward slice-first exploration
 - export Markdown, JSON, DOT, and static HTML views
 - inspect/search/filter the visual map as a bonus layer
@@ -72,6 +77,13 @@ Token counts are local estimates based on text length. They are useful for compa
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
+```
+
+MCP support uses the official Python MCP SDK and is optional:
+
+```bash
+pip install -e ".[mcp]"
+codeprism mcp --list-tools
 ```
 
 `codeprism init` creates `.contextopt/config.toml` for local settings. Generated `.contextopt/` files are ignored by Git; see `examples/contextopt.config.example.toml` for the default config shape.
@@ -133,6 +145,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
 | `codeprism prime "topic" --artifact-dir <dir> --readonly-root` | Write prime artifacts outside the target repo and refuse root writes. |
 | `codeprism get <node-id>` | Print exact source for a mapped file, doc, or symbol node. |
+| `codeprism references <node-id>` | Show incoming and outgoing graph references for a node. |
 | `codeprism read <path> --mode map` | Print mapped nodes for a file without source bodies. |
 | `codeprism read <path> --mode signatures` | Print mapped symbols/headings/routes without source bodies. |
 | `codeprism read <path> --mode diff` | Print only the working-tree diff for one path. |
@@ -144,6 +157,10 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism stats` | Estimate source, graph, and pack token sizes. |
 | `codeprism gain` | Report estimated token savings and map freshness. |
 | `codeprism slice <target>` | Export focused Markdown plus a JSON context overlay manifest. |
+| `codeprism benchmark <root>` | Write a reproducible local token-savings report. |
+| `codeprism onboard` | Write local project memory under `.contextopt/memory/`. |
+| `codeprism memory list/read/write` | Manage inspectable local memory files. |
+| `codeprism mcp --list-tools` | List optional MCP tools for agent clients. |
 | `codeprism setup` | Install and verify agent helper files in one step. |
 | `codeprism install-integrations` | Install local Codex/Claude/Copilot helper files. |
 | `codeprism doctor` | Check whether installed helper files are present and current. |
@@ -157,6 +174,7 @@ codeprism prime "billing webhook"
 codeprism gain
 codeprism read src/app.py --mode signatures
 codeprism get function::src/app.py::billing_webhook
+codeprism references function::src/app.py::billing_webhook
 codeprism visualize --context .contextopt/slices/billing-webhook.json --outdir .contextopt/visual
 ```
 
@@ -177,6 +195,28 @@ codeprism prime "what I need" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFAC
 ```
 
 This writes `context.db`, Markdown slices, and JSON manifests under the artifact directory instead of `.contextopt/` in the target repo.
+
+For an MCP client, install the optional extra and launch the local stdio server:
+
+```bash
+pip install -e ".[mcp]"
+codeprism mcp --root PATH_TO_REPO
+```
+
+The MCP server currently exposes `prime`, `gain`, `query`, `read`, `get`, and `references`. It is intentionally local-first and does not call external APIs.
+
+To create a local project memory file for future agent sessions:
+
+```bash
+codeprism onboard --notes "Build/test commands, project purpose, and safety notes."
+codeprism memory read project
+```
+
+To reproduce token-saving examples:
+
+```bash
+codeprism benchmark examples/benchmarks/basic-python --query report --out .contextopt/benchmarks/basic-python.json
+```
 
 ## Privacy Model
 

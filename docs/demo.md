@@ -40,9 +40,10 @@ Replace `PATH_TO_REPO` and `PATH_TO_ARTIFACTS` with normal project and output pa
 ```bash
 codeprism stats
 codeprism gain
+codeprism benchmark examples/benchmarks/basic-python --query report --out .contextopt/benchmarks/basic-python.json
 ```
 
-The stats command reports local estimated token counts for source, graph, and context-pack outputs. The gain command reports estimated saved tokens and warns if files changed after the latest map. These are estimates for comparison, not benchmark claims.
+The stats command reports local estimated token counts for source, graph, and context-pack outputs. The gain command reports estimated saved tokens and warns if files changed after the latest map. The benchmark command writes a reproducible JSON report for a fixture or target repo. These are estimates for comparison, not benchmark claims.
 
 ## 4. Install Agent Helpers
 
@@ -70,9 +71,25 @@ Fetch exact source for a mapped node before opening whole files:
 
 ```bash
 codeprism get function::src/app.py::main
+codeprism references function::src/app.py::main
 ```
 
 Use `--mode full` only when the cheaper map, signatures, diff, slice, or exact node output is insufficient. The get command prints only the mapped source span for that node, with line and token estimate metadata.
+
+For durable local handoff notes:
+
+```bash
+codeprism onboard --notes "Project purpose, build commands, and safety notes."
+codeprism memory read project
+```
+
+For MCP-capable clients:
+
+```bash
+pip install -e ".[mcp]"
+codeprism mcp --list-tools
+codeprism mcp --root .
+```
 
 ## 5. Replay Activity
 

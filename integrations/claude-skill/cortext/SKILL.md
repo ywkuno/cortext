@@ -34,6 +34,7 @@ codeprism prime "topic, file, symbol, or bug" --root PATH_TO_REPO --artifact-dir
 
 ```bash
 codeprism get NODE_ID
+codeprism references NODE_ID
 ```
 
 4. Use progressive file reads before full files:
@@ -53,13 +54,20 @@ codeprism stats
 codeprism gain
 ```
 
-7. If CodePrism behavior seems stale, check the installed helpers:
+7. Use local project memory when the task needs durable handoff context:
+
+```bash
+codeprism onboard --notes "project purpose, build/test commands, and safety notes"
+codeprism memory read project
+```
+
+8. If CodePrism behavior seems stale, check the installed helpers:
 
 ```bash
 codeprism doctor
 ```
 
-8. Use the visual map as a bonus inspection layer, not the first step:
+9. Use the visual map as a bonus inspection layer, not the first step:
 
 ```bash
 codeprism visualize --context .contextopt/slices/<slice>.json
@@ -70,6 +78,7 @@ codeprism visualize --context .contextopt/slices/<slice>.json
 - Prefer deterministic context pack facts over guesses.
 - If the map is stale, refresh it.
 - Use `codeprism gain` when you need to confirm estimated savings or map freshness.
+- Use `codeprism references` before broad search when a mapped node is central to the task.
 - Do not send private project files to external APIs.
 - Ask for raw files only after consulting the slice, map, `codeprism get`, or `codeprism read --mode signatures/diff` output.
 - Treat token counts as estimates, not billing-grade measurements.

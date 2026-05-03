@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .activity import write_activity_payload
 from .activity_adapters import adapt_tool_jsonl
+from .benchmark import default_benchmark_path, format_benchmark, run_benchmark
 from .config import load_config
 from .exporters.dot import export_dot
 from .exporters.json_export import export_json
@@ -22,8 +23,11 @@ from .integrations import (
     install_integrations,
 )
 from .mapper import map_project
+from .mcp_server import McpDependencyError, mcp_tool_specs, run_mcp_server
+from .memory import MemoryError, list_memories, read_memory, write_memory, write_project_memory
 from .query import query_graph
 from .read_modes import ReadError, format_read_result, read_path
+from .references import ReferencesError, find_references, format_references
 from .retrieval import RetrievalError, format_retrieved_source, retrieve_source
 from .slicer import default_slice_path, export_slice
 from .stats import compute_stats, format_stats
@@ -64,6 +68,9 @@ def main(argv: list[str] | None = None) -> int:
     p_query.add_argument("text")
     p_query.add_argument("--db", default=".contextopt/context.db")
     p_query.add_argument("--limit", type=int, default=20)
+    p_references = sub.add_parser("references", help="Show graph references for a node ID.")
+    p_references.add_argument("node_id")
+    p_references.add_argument("--db", default=".contextopt/context.db")
     p_get = sub.add_parser("get", help="Print exact source for a mapped node ID.")
     p_get.add_argument("node_id")
     p_get.add_argument("--root", default=".")
@@ -82,6 +89,36 @@ def main(argv: list[str] | None = None) -> int:
     p_gain.add_argument("--slice", help="Optional slice manifest JSON. Defaults to latest local slice.")
     p_gain.add_argument("--max-file-bytes", type=int)
     p_gain.add_argument("--ignore", action="append", default=[])
+    p_onboard = sub.add_parser("onboard", help="Map a repo and write local project memory.")
+    p_onboard.add_argument("root", nargs="?", default=".")
+    p_onboard.add_argument("--db")
+    p_onboard.add_argument("--out")
+    p_onboard.add_argument("--notes", default="")
+    p_onboard.add_argument("--max-file-bytes", type=int)
+    p_onboard.add_argument("--ignore", action="append", default=[])
+    p_benchmark = sub.add_parser("benchmark", help="Write an honest local token-savings report.")
+    p_benchmark.add_argument("root", nargs="?", default=".")
+    p_benchmark.add_argument("--query", default="main")
+    p_benchmark.add_argument("--db")
+    p_benchmark.add_argument("--out")
+    p_benchmark.add_argument("--max-file-bytes", type=int)
+    p_benchmark.add_argument("--ignore", action="append", default=[])
+    p_mcp = sub.add_parser("mcp", help="Run the experimental CodePrism MCP server.")
+    p_mcp.add_argument("--root", default=".")
+    p_mcp.add_argument("--db", default=".contextopt/context.db")
+    p_mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio")
+    p_mcp.add_argument("--list-tools", action="store_true")
+    p_memory = sub.add_parser("memory", help="Read and write local CodePrism memory files.")
+    memory_sub = p_memory.add_subparsers(dest="memory_cmd", required=True)
+    p_memory_list = memory_sub.add_parser("list", help="List local memory files.")
+    p_memory_list.add_argument("--root", default=".")
+    p_memory_read = memory_sub.add_parser("read", help="Read a local memory file.")
+    p_memory_read.add_argument("name")
+    p_memory_read.add_argument("--root", default=".")
+    p_memory_write = memory_sub.add_parser("write", help="Write a local memory file.")
+    p_memory_write.add_argument("name")
+    p_memory_write.add_argument("--text", required=True)
+    p_memory_write.add_argument("--root", default=".")
     p_prime = sub.add_parser(
         "prime",
         help="Map the repo and write a focused slice for the current task.",
@@ -192,7 +229,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "map":
         root = Path(args.root).resolve()
         config = load_config(root)
-        db = Path(args.db)
+        db = _prime_db_path(root, args.db, None)
         db.parent.mkdir(parents=True, exist_ok=True)
         result = map_project(
             root,
@@ -326,6 +363,14 @@ def main(argv: list[str] | None = None) -> int:
         for row in query_graph(GraphStore(Path(args.db)), args.text, args.limit):
             print(f"{row['kind']:10} {row['path']} {row['name']}")
         return 0
+    if args.cmd == "references":
+        try:
+            result = find_references(GraphStore(Path(args.db)), args.node_id)
+        except ReferencesError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        print(format_references(result), end="")
+        return 0
     if args.cmd == "get":
         try:
             result = retrieve_source(
@@ -374,6 +419,69 @@ def main(argv: list[str] | None = None) -> int:
             ignore_patterns=[*config.ignore, *args.ignore],
         )
         print(format_gain(gain), end="")
+        return 0
+    if args.cmd == "onboard":
+        root = Path(args.root).resolve()
+        config = load_config(root)
+        db = _prime_db_path(root, args.db, None)
+        db.parent.mkdir(parents=True, exist_ok=True)
+        store = GraphStore(db)
+        map_project(
+            root,
+            store,
+            max_file_bytes=args.max_file_bytes or config.max_file_bytes,
+            ignore_patterns=[*config.ignore, *args.ignore],
+        )
+        out = Path(args.out) if args.out else None
+        path = write_project_memory(root, store, notes=args.notes, out=out)
+        print(f"Wrote project memory {path}")
+        return 0
+    if args.cmd == "benchmark":
+        root = Path(args.root).resolve()
+        config = load_config(root)
+        out = Path(args.out) if args.out else default_benchmark_path(root, args.query)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        store = GraphStore(_prime_db_path(root, args.db, None))
+        result = run_benchmark(
+            root,
+            store,
+            query=args.query,
+            out=out,
+            max_file_bytes=args.max_file_bytes or config.max_file_bytes,
+            ignore_patterns=[*config.ignore, *args.ignore],
+        )
+        print(format_benchmark(result, out), end="")
+        return 0
+    if args.cmd == "memory":
+        root = Path(args.root).resolve()
+        try:
+            if args.memory_cmd == "list":
+                for name in list_memories(root):
+                    print(name)
+                return 0
+            if args.memory_cmd == "read":
+                print(read_memory(root, args.name), end="")
+                return 0
+            if args.memory_cmd == "write":
+                path = write_memory(root, args.name, args.text)
+                print(f"Wrote memory {path}")
+                return 0
+        except MemoryError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+    if args.cmd == "mcp":
+        if args.list_tools:
+            print(json.dumps({"tools": mcp_tool_specs()}, indent=2, sort_keys=True))
+            return 0
+        try:
+            run_mcp_server(
+                root=Path(args.root).resolve(),
+                db=Path(args.db),
+                transport=args.transport,
+            )
+        except McpDependencyError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
         return 0
     if args.cmd == "prime":
         root = Path(args.root).resolve()

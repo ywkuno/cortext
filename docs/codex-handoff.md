@@ -26,6 +26,7 @@ codeprism export --format md --out .contextopt/context-pack.md
 codeprism export --format json --out .contextopt/context-pack.json
 codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
+codeprism references "heading::README.md::Quick Start"
 codeprism prime main
 codeprism prime "current task" --changed
 codeprism prime "current task" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
@@ -35,6 +36,10 @@ codeprism visualize --outdir .contextopt/visual
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
 codeprism stats
 codeprism gain
+codeprism benchmark examples/benchmarks/basic-python --query report --out .contextopt/benchmarks/basic-python.json
+codeprism onboard --notes "Project purpose, build commands, and safety notes."
+codeprism memory read project
+codeprism mcp --list-tools
 codeprism slice main --out .contextopt/slices/main.md
 codeprism visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
 codeprism setup --target project
@@ -78,6 +83,10 @@ Then inspect generated files under `.contextopt/`.
 - `codeprism get <node-id>` prints exact source for mapped file, doc, and symbol nodes, using stable node IDs from slices, query results, or graph JSON.
 - `codeprism read <path> --mode map|signatures|diff|full` lets agents inspect file shape, symbols, or one-file diffs before explicitly reading full files.
 - `codeprism gain` reports estimated saved tokens and warns when files changed after the latest map.
+- `codeprism references <node-id>` reports incoming and outgoing graph references.
+- `codeprism onboard` and `codeprism memory` manage inspectable local project memory under `.contextopt/memory/`.
+- `codeprism benchmark` writes reproducible JSON savings reports.
+- `codeprism mcp --list-tools` shows the experimental MCP tool surface; `codeprism mcp` needs the optional `.[mcp]` extra.
 - `codeprism slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .contextopt/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `codeprism install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `codeprism prime` before broad file reads.

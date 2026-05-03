@@ -16,10 +16,10 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
    GSD and CocoIndex Code put the install path near the top and make the expected first command obvious. CodePrism should keep `codeprism setup` as the friendly path and leave `install-integrations` as the scriptable lower-level command.
 
 2. **Agent-native adoption.**
-   Tools that win do not just generate artifacts. They install skills, commands, MCP servers, hooks, or rules that make agents use the context layer automatically. CodePrism should keep improving Codex/Claude/Copilot helpers and add MCP next.
+   Tools that win do not just generate artifacts. They install skills, commands, MCP servers, hooks, or rules that make agents use the context layer automatically. CodePrism now has helper installs and an experimental MCP entrypoint; next it should document client setup and add resources/prompts.
 
 3. **Visible proof of savings.**
-   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism now has `codeprism gain`; next it should add reproducible benchmark fixtures before making stronger public claims.
+   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism now has `codeprism gain` and `codeprism benchmark`; next it should add more fixtures before making stronger public claims.
 
 4. **Doctor commands.**
    LeanCTX and CocoIndex Code both make diagnostics part of onboarding. CodePrism now has `codeprism doctor` and stale-map reporting in `codeprism gain`; next it should diagnose PATH, CLI version, stale skills, and missing maps.
@@ -49,7 +49,7 @@ The visual map is useful, but the public front should keep context saving as the
 - `codeprism read PATH --mode map|signatures|diff|full`: token-aware file read modes.
 - `codeprism gain`: report estimated saved tokens from slices and map freshness.
 - `codeprism uninstall-integrations`: safe cleanup.
-- `codeprism mcp`: expose prime/query/slice/get/read/gain/stats as MCP tools.
-- `codeprism benchmark fixtures/`: reproducible token-saving examples.
+- `codeprism mcp`: add resources/prompts and client setup docs.
+- `codeprism benchmark fixtures/`: grow reproducible token-saving examples across languages.
 - `codeprism watch`: optional local refresh loop for active repos.
 - Public landing assets: short GIF, before/after token example, and cleaner viewer screenshot.

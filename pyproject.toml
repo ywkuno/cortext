@@ -25,6 +25,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6.0", "mypy>=1.10"]
+mcp = ["mcp>=1.13"]
 
 [project.scripts]
 codeprism = "contextopt.cli:main"
