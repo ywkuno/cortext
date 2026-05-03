@@ -25,12 +25,15 @@ The goal is simple: map first, query next, read raw files only when they matter.
 
 ## Status
 
-Cortext is an early MVP, but the core loop is usable:
+Cortext is alpha software. The current release is meant for local development workflows where you want an inspectable map before handing a codebase to an AI assistant.
 
-- MVP1 = mapper and context export.
-- MVP2 = visual brain map.
-- MVP3 = animated pixel brain / agent replay.
-- MVP4 = token stats and targeted context slices.
+The core loop is usable today:
+
+- map a repository into a local SQLite graph
+- export Markdown, JSON, DOT, and static HTML views
+- inspect/search/filter the visual map
+- replay safe JSONL activity events
+- estimate context size and generate focused slices
 
 Token counts are local estimates based on text length. They are useful for comparing full-source, graph, context-pack, and slice sizes, but they are not benchmark claims.
 
@@ -141,10 +144,6 @@ CI runs tests, Ruff, and a CLI smoke path across Python 3.10, 3.11, and 3.12.
 ## Roadmap
 
 Near-term work is focused on making the visual map more useful, improving slice ranking, and adding deeper static extraction without making the tool heavyweight. See `docs/roadmap.md` for the current plan.
-
-## Public Launch
-
-Use [docs/public-launch-checklist.md](docs/public-launch-checklist.md) before pushing or making the repository public.
 
 ## License
 

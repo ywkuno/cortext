@@ -12,3 +12,7 @@
 *.css text eol=lf
 *.js text eol=lf
 *.ts text eol=lf
+
+# Maintainer-only release process notes are kept in the private development
+# repository and omitted from clean public release archives.
+docs/release-checklist.md export-ignore

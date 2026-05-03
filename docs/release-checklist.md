@@ -1,19 +1,19 @@
-# Public Launch Checklist
+# Maintainer Release Checklist
 
-Use this checklist before making the repository public.
+Use this checklist before refreshing the public `main` branch, cutting a release, or changing repository visibility.
 
 ## Recommendation
 
-Do not run `git init` again inside this repository. The current repo already has clean commits and an `origin` remote.
+Do not run `git init` again inside an existing checkout. Verify the current remotes and branch before publishing.
 
-Recommended path:
+Recommended maintainer path:
 
-1. Keep this repository as the source of truth.
+1. Work in the private development repository.
 2. Keep generated `.contextopt/` outputs ignored.
-3. Push the current branch to the GitHub repo.
-4. Verify GitHub Actions on the remote.
+3. Publish only a reviewed clean tree to the public repository.
+4. Verify GitHub Actions on the public remote.
 
-Only create a fresh orphan branch or new repository if you want to hide or squash local development history before public release.
+Use a fresh orphan branch or exported tree when you want the public repository to have a compact release history.
 
 ## Preflight
 
@@ -56,21 +56,23 @@ Expected:
 
 ## GitHub Setup
 
-If the remote already exists:
+For normal private development:
 
 ```bash
 git remote -v
 git push -u origin master
 ```
 
-If you want to use `main` before public launch:
+For a clean public release, publish from an orphan branch or exported tree:
 
 ```bash
-git branch -m master main
-git push -u origin main
+git switch --orphan public-main
+git add -A
+git commit -m "Release"
+git push public public-main:main
 ```
 
-Then set the default branch to `main` in GitHub repository settings.
+Use force-push only when intentionally replacing the public one-commit release history.
 
 Recommended GitHub repo metadata:
 
@@ -94,9 +96,9 @@ Verify:
 - license, contributing, and security policy are visible
 - issue and pull request templates render
 
-## Optional Clean-History Path
+## Clean-History Path
 
-Use this only if you decide the development history should not be public.
+Use this when the development history should remain private.
 
 ```bash
 git switch --orphan public-main
