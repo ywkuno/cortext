@@ -24,6 +24,7 @@ contextopt export --format md --out .contextopt/context-pack.md
 contextopt export --format json --out .contextopt/context-pack.json
 contextopt prime main
 contextopt prime "current task" --changed
+contextopt prime "current task" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
 contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
 contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
 contextopt visualize --outdir .contextopt/visual
@@ -64,10 +65,12 @@ Then inspect generated files under `.contextopt/`.
 - MVP4 token workflow starts with `contextopt stats`, `contextopt query`, and `contextopt slice`.
 - `contextopt prime <task>` maps, estimates, and writes a focused slice in one step.
 - `contextopt prime <task> --changed` seeds the slice with changed, staged, and untracked Git files.
+- `contextopt prime <task> --artifact-dir <dir> --readonly-root` routes generated artifacts outside a target repo and refuses root writes.
 - Prime prints source, full-context, slice, estimated saving, included file/symbol/edge counts, and changed-file count when used.
 - `contextopt slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
 - `contextopt visualize --context .contextopt/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `contextopt install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `contextopt prime` before broad file reads.
+- Dedicated extractors now cover Python, Markdown, JavaScript/TypeScript, and Java; common other languages use a deterministic generic fallback.
 - `docs/visualization-plan.md` tracks the browser map plan.
 - `docs/pixel-brain-mode.md` and `docs/activity-stream-schema.md` cover the future activity replay layer.
 - `examples/activity-stream.sample.jsonl` is the sample event stream.

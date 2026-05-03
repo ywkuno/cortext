@@ -88,12 +88,15 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - `contextopt slice <path-or-symbol>` for targeted Markdown context packs
 - `contextopt prime <task>` as the one-command agent preflight: map, estimate, slice, then read the slice first
 - `contextopt prime <task> --changed` seeds context from changed, staged, and untracked Git files
+- `contextopt prime <task> --artifact-dir <dir> --readonly-root` supports read-only repos and CI artifact routing
 - Prime output includes source, full-context, slice, estimated saving, file count, symbol count, and edge count
 - Slice JSON manifests for context-inclusion overlays
 - Viewer compares slice tokens against full graph context estimate
 - Viewer highlights context-included nodes
 - Query-first workflow docs for Codex/Claude usage
 - Local Codex/Claude skill installation so agents actually use slices before broad reads
+- Java package/import/type/method extraction
+- Broad deterministic fallback for common non-Python languages, with honest limitations
 - Honest estimated token reporting rather than benchmark claims
 - Next: rank slices by call graph signals, richer docs mentions, recent activity, and per-language ownership hints
 - Next: benchmark Cortext slices against full-source packs and other repo-packing tools using reproducible fixtures

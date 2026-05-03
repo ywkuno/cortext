@@ -63,21 +63,40 @@ def _normalize_rel_path(path: str) -> str:
     return normalized.strip("/")
 
 
+def _safe_meta(value: object) -> dict[str, Any]:
+    if not isinstance(value, str) or not value:
+        return {}
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
 def _legacy_tokens_for_node(node: dict[str, Any]) -> set[str]:
     tokens = {_node_row_id(node)}
     if node["kind"] in FILE_KINDS:
         tokens.add(f"file:{node['path']}")
     tokens.add(f"py:{node['path']}:{node['name']}")
     tokens.add(f"js:{node['path']}:{node['name']}")
+    tokens.add(f"java:{node['path']}:{node['name']}")
+    tokens.add(f"generic:{node['path']}:{node['name']}")
     if node["kind"] == "heading":
         tokens.add(f"heading:{node['path']}:{node['name']}")
     if node["kind"] == "route":
         tokens.add(f"route:{node['name']}")
     if node["kind"] in FILE_KINDS:
+        meta = _safe_meta(node.get("meta_json"))
+        module = meta.get("module")
+        if isinstance(module, str) and module:
+            tokens.add(f"module:{module}")
         normalized = _normalize_rel_path(str(node["path"]))
         without_suffix = normalized.rsplit(".", 1)[0]
         dotted = without_suffix.replace("/", ".")
         stem = without_suffix.rsplit("/", 1)[-1]
+        package = meta.get("package")
+        if isinstance(package, str) and package and stem:
+            tokens.add(f"module:{package}.{stem}")
         if dotted:
             tokens.add(f"module:{dotted}")
         if stem:

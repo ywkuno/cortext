@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 
 from .activity import write_activity_payload
@@ -51,8 +52,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_prime.add_argument("query")
     p_prime.add_argument("--root", default=".")
-    p_prime.add_argument("--db", default=".contextopt/context.db")
+    p_prime.add_argument("--db")
     p_prime.add_argument("--out")
+    p_prime.add_argument(
+        "--artifact-dir",
+        help="Write generated prime artifacts to this directory instead of the project root.",
+    )
+    p_prime.add_argument(
+        "--readonly-root",
+        action="store_true",
+        help="Refuse to write generated artifacts inside --root.",
+    )
     p_prime.add_argument("--limit", type=int, default=12)
     p_prime.add_argument("--max-file-bytes", type=int)
     p_prime.add_argument("--ignore", action="append", default=[])
@@ -218,9 +228,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "prime":
         root = Path(args.root).resolve()
         changed_paths = _changed_paths(root) if args.changed else []
-        db = Path(args.db)
-        if not db.is_absolute():
-            db = root / db
+        artifact_dir = _resolve_optional_path(args.artifact_dir)
+        db = _prime_db_path(root, args.db, artifact_dir)
+        out = _prime_out_path(root, args.query, args.out, artifact_dir)
+        if args.readonly_root and (
+            _is_relative_to(db.resolve(), root) or _is_relative_to(out.resolve(), root)
+        ):
+            print(
+                "Error: refusing to write artifacts inside read-only root. "
+                "Use --artifact-dir outside --root, or pass --db/--out outside --root.",
+                file=sys.stderr,
+            )
+            return 2
         db.parent.mkdir(parents=True, exist_ok=True)
         config = load_config(root)
         store = GraphStore(db)
@@ -230,9 +249,6 @@ def main(argv: list[str] | None = None) -> int:
             max_file_bytes=args.max_file_bytes or config.max_file_bytes,
             ignore_patterns=[*config.ignore, *args.ignore],
         )
-        out = Path(args.out) if args.out else default_slice_path(args.query)
-        if not out.is_absolute():
-            out = root / out
         slice_result = export_slice(
             store,
             args.query,
@@ -292,6 +308,45 @@ def _git_lines(root: Path, args: list[str]) -> list[str]:
     if result.returncode != 0:
         return []
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def _resolve_optional_path(value: str | None) -> Path | None:
+    if not value:
+        return None
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else (Path.cwd() / path).resolve()
+
+
+def _prime_db_path(root: Path, explicit_db: str | None, artifact_dir: Path | None) -> Path:
+    if explicit_db:
+        db = Path(explicit_db).expanduser()
+        return db if db.is_absolute() else root / db
+    if artifact_dir:
+        return artifact_dir / "context.db"
+    return root / ".contextopt" / "context.db"
+
+
+def _prime_out_path(
+    root: Path,
+    query: str,
+    explicit_out: str | None,
+    artifact_dir: Path | None,
+) -> Path:
+    if explicit_out:
+        out = Path(explicit_out).expanduser()
+        return out if out.is_absolute() else root / out
+    default_out = default_slice_path(query)
+    if artifact_dir:
+        return artifact_dir / Path(*default_out.parts[1:])
+    return root / default_out
+
+
+def _is_relative_to(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
 
 
 def _changed_paths(root: Path) -> list[str]:

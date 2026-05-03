@@ -14,7 +14,8 @@ The goal is simple: **map first, slice next, read raw files only when they matte
 ## What It Does
 
 - Builds a local SQLite graph of your repository.
-- Extracts deterministic structure from Python, Markdown, and JavaScript/TypeScript files.
+- Extracts deterministic structure from Python, Markdown, JavaScript/TypeScript, and Java files.
+- Uses a broad static fallback for common languages such as C/C++, C#, Go, Rust, Ruby, PHP, Kotlin, Swift, shell, PowerShell, and Lua.
 - Reuses file hashes so unchanged files are not rescanned.
 - Runs `contextopt prime "<task>"` to map the repo and write a targeted slice in one step.
 - Estimates context size and creates targeted Markdown slices for focused work.
@@ -58,6 +59,14 @@ contextopt visualize --context .contextopt/slices/main.json --outdir .contextopt
 Read the generated `.contextopt/slices/main.md` before opening broad raw file trees. Open `.contextopt/visual/index.html` in a browser when you want the optional graph view.
 See [docs/demo.md](docs/demo.md) for the full activity replay and context-overlay walkthrough.
 
+For read-only checkouts or CI jobs, route generated artifacts outside the repository:
+
+```bash
+contextopt prime "server boot" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
+```
+
+Use a project-specific temp or output directory for `PATH_TO_ARTIFACTS` on Windows, macOS, or Linux.
+
 ## Agent Install
 
 Install local helper prompts and skills so Codex, Claude, and Copilot start with Cortext before broad exploration:
@@ -93,6 +102,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `contextopt export --format dot` | Export DOT graph data. |
 | `contextopt prime "topic"` | Map the repo, write a focused slice, and print a savings report. |
 | `contextopt prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
+| `contextopt prime "topic" --artifact-dir <dir> --readonly-root` | Write prime artifacts outside the target repo and refuse root writes. |
 | `contextopt visualize` | Generate a static browser viewer. |
 | `contextopt activity adapt-tool-log` | Convert simple safe tool-event JSONL into Cortext activity JSONL. |
 | `contextopt activity normalize` | Normalize safe JSONL activity events into replay JSON. |
@@ -120,10 +130,18 @@ contextopt prime "what I am changing" --changed
 
 The assistant should read the slice first, then verify important details in raw source files before editing.
 
+For a repository that should not receive generated files, use:
+
+```bash
+contextopt prime "what I need" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
+```
+
+This writes `context.db`, Markdown slices, and JSON manifests under the artifact directory instead of `.contextopt/` in the target repo.
+
 ## Privacy Model
 
 - No network calls are made by default.
-- Generated artifacts live under `.contextopt/`.
+- Generated artifacts live under `.contextopt/` by default, or under `--artifact-dir` when supplied.
 - Outputs are inspectable text, JSON, DOT, HTML, or SQLite.
 - Optional LLM summarization is intentionally out of scope for the default path.
 

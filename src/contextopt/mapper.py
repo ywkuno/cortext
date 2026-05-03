@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .extractors.base import Extraction, Node
+from .extractors.generic import extract_generic, language_for_suffix
+from .extractors.java import extract_java
 from .extractors.js_ts import extract_js_ts
 from .extractors.markdown import extract_markdown
 from .extractors.python import extract_python
@@ -14,7 +16,7 @@ from .graph import GraphStore
 from .ids import stable_node_id
 from .scanner import ScannedFile, scan_files
 
-EXTRACTION_CACHE_VERSION = "mvp2-v1"
+EXTRACTION_CACHE_VERSION = "mvp4-v2"
 
 
 @dataclass
@@ -33,8 +35,13 @@ def extract_file(path: Path, rel_path: str) -> Extraction:
         return extract_python(path, rel_path)
     if suffix in {".md", ".mdx"}:
         return extract_markdown(path, rel_path)
+    if suffix == ".java":
+        return extract_java(path, rel_path)
     if suffix in {".js", ".jsx", ".ts", ".tsx"}:
         return extract_js_ts(path, rel_path)
+    language = language_for_suffix(suffix)
+    if language:
+        return extract_generic(path, rel_path, language)
     return Extraction(
         nodes=[Node(kind="file", path=rel_path, name=rel_path, meta={"language": "unknown"})]
     )

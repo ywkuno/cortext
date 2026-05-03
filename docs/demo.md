@@ -27,6 +27,14 @@ contextopt prime "current task" --changed
 
 The command prints source, full-context, and slice token estimates plus an estimated saving percentage.
 
+For a read-only checkout or a CI smoke run, keep artifacts outside the target repo:
+
+```bash
+contextopt prime "current task" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
+```
+
+Replace `PATH_TO_REPO` and `PATH_TO_ARTIFACTS` with normal project and output paths for your machine. With `--readonly-root`, Cortext refuses to write generated artifacts under `--root`.
+
 ## 3. Review Token Estimates
 
 ```bash

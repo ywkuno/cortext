@@ -104,8 +104,17 @@ def _legacy_lookup(nodes: list[dict[str, Any]]) -> dict[str, str]:
         lookup[node_id] = node_id
         if node["kind"] in {"file", "doc"}:
             lookup[f"file:{node['path']}"] = node_id
+            module = node["meta"].get("module")
+            if isinstance(module, str) and module:
+                lookup[f"module:{module}"] = node_id
+            package = node["meta"].get("package")
+            stem = node["path"].replace("\\", "/").rsplit("/", 1)[-1].rsplit(".", 1)[0]
+            if isinstance(package, str) and package and stem:
+                lookup[f"module:{package}.{stem}"] = node_id
         lookup[f"py:{node['path']}:{node['name']}"] = node_id
         lookup[f"js:{node['path']}:{node['name']}"] = node_id
+        lookup[f"java:{node['path']}:{node['name']}"] = node_id
+        lookup[f"generic:{node['path']}:{node['name']}"] = node_id
         if node["kind"] == "heading":
             lookup[f"heading:{node['path']}:{node['name']}"] = node_id
         if node["kind"] == "route":

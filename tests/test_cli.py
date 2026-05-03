@@ -204,3 +204,62 @@ def test_prime_changed_seeds_slice_from_git_changes(tmp_path: Path):
     assert "feature.py" in slice_text
     assert "changed_feature" in slice_text
     assert "Changed files: 1" in result.stdout
+
+
+def test_prime_artifact_dir_keeps_outputs_outside_readonly_root(tmp_path: Path):
+    project = tmp_path / "project"
+    artifacts = tmp_path / "artifacts"
+    project.mkdir()
+    (project / "app.py").write_text("def target_symbol():\n    return 1\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "target symbol",
+            "--root",
+            str(project),
+            "--artifact-dir",
+            str(artifacts),
+            "--readonly-root",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (artifacts / "context.db").exists()
+    assert (artifacts / "slices" / "target-symbol.md").exists()
+    assert (artifacts / "slices" / "target-symbol.json").exists()
+    assert not (project / ".contextopt").exists()
+
+
+def test_prime_readonly_root_rejects_default_outputs_under_root(tmp_path: Path):
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "app.py").write_text("def target_symbol():\n    return 1\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "target symbol",
+            "--root",
+            str(project),
+            "--readonly-root",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "refusing to write artifacts inside read-only root" in result.stderr.lower()
+    assert not (project / ".contextopt").exists()

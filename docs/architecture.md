@@ -25,9 +25,11 @@ Deterministic parsers collect symbols and relationships.
 Initial extractors:
 
 - Python: stdlib `ast`
+- Java: deterministic package/import/type/method fallback
 - JavaScript/TypeScript: regex fallback in starter; upgrade to Tree-sitter later
 - Markdown: heading map and links
-- Generic text: file metadata only
+- Generic code fallback: common symbols/imports for C/C++, C#, Go, Rust, Ruby, PHP, Kotlin, Swift, shell, PowerShell, Lua, and similar files
+- Unknown text: file metadata only
 
 ### Graph store
 
