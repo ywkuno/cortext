@@ -17,6 +17,12 @@ Cortext's main job is context saving and token optimization. The visual map is u
 contextopt prime "topic, file, symbol, or bug"
 ```
 
+For work already in progress, include changed files:
+
+```bash
+contextopt prime "topic, file, symbol, or bug" --changed
+```
+
 2. Read the generated `.contextopt/slices/*.md` file first.
 3. Open only the raw files named in the slice unless the slice is clearly insufficient.
 4. For broader orientation, refresh the map and stats:
@@ -39,3 +45,4 @@ contextopt visualize --context .contextopt/slices/<slice>.json
 - Do not send private project files to external APIs.
 - Ask for raw files only after consulting the slice or map.
 - Treat token counts as estimates, not billing-grade measurements.
+- Prefer `--changed` when there are local edits, staged changes, or new files.

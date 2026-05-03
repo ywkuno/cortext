@@ -23,6 +23,7 @@ contextopt map .
 contextopt export --format md --out .contextopt/context-pack.md
 contextopt export --format json --out .contextopt/context-pack.json
 contextopt prime main
+contextopt prime "current task" --changed
 contextopt activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
 contextopt activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json
 contextopt visualize --outdir .contextopt/visual
@@ -62,6 +63,8 @@ Then inspect generated files under `.contextopt/`.
 - MVP3 replay supports `from_node_id`, `to_node_id`, `duration_ms`, estimated/actual token fields, timeline controls, speed control, one marker per agent, activity trails, searchable event list, run/agent filters, jump-to-node, touched-only mode, and current-event HUD text.
 - MVP4 token workflow starts with `contextopt stats`, `contextopt query`, and `contextopt slice`.
 - `contextopt prime <task>` maps, estimates, and writes a focused slice in one step.
+- `contextopt prime <task> --changed` seeds the slice with changed, staged, and untracked Git files.
+- Prime prints source, full-context, slice, estimated saving, included file/symbol/edge counts, and changed-file count when used.
 - `contextopt slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
 - `contextopt visualize --context .contextopt/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `contextopt install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `contextopt prime` before broad file reads.

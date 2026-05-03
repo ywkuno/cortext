@@ -8,4 +8,10 @@ Before broad exploration, create a focused slice for the current task:
 contextopt prime "topic or symbol"
 ```
 
+When local edits already exist, prefer:
+
+```bash
+contextopt prime "topic or symbol" --changed
+```
+
 Use the generated `.contextopt/slices/*.md` file as the first source for project structure, important files, and symbol locations. Verify in raw files before changing code.

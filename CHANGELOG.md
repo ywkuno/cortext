@@ -3,7 +3,9 @@
 ## Unreleased
 
 - Repositioned Cortext around context saving and token optimization, with visualization documented as an optional inspection layer.
-- Added `contextopt prime <task>` to map a repo and write a focused context slice in one step.
+- Added `contextopt prime <task>` to map a repo, write a focused context slice, and print a savings report in one step.
+- Added `contextopt prime <task> --changed` to seed slices from changed, staged, and untracked Git files.
+- Improved slice ranking with tokenized/stemmed matching, local import expansion, changed-path seeds, and related test inclusion.
 - Added `contextopt install-integrations` for local Codex, Claude, and Copilot helpers.
 - Added project-level Claude commands, including `/context-slice`, and Copilot instructions for slice-first workflows.
 - Added the Cortext public README, license, contribution guide, and security policy.

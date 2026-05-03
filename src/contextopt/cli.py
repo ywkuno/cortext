@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from pathlib import Path
 
 from .activity import write_activity_payload
@@ -55,11 +56,17 @@ def main(argv: list[str] | None = None) -> int:
     p_prime.add_argument("--limit", type=int, default=12)
     p_prime.add_argument("--max-file-bytes", type=int)
     p_prime.add_argument("--ignore", action="append", default=[])
+    p_prime.add_argument(
+        "--changed",
+        action="store_true",
+        help="Seed the slice with changed, staged, and untracked git files.",
+    )
     p_slice = sub.add_parser("slice", help="Export a targeted context slice.")
     p_slice.add_argument("query")
     p_slice.add_argument("--db", default=".contextopt/context.db")
     p_slice.add_argument("--out")
     p_slice.add_argument("--limit", type=int, default=12)
+    p_slice.add_argument("--path", action="append", default=[], help="Seed the slice with a file path.")
     p_visualize = sub.add_parser(
         "visualize",
         help="Generate an interactive browser view of the project map.",
@@ -210,6 +217,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "prime":
         root = Path(args.root).resolve()
+        changed_paths = _changed_paths(root) if args.changed else []
         db = Path(args.db)
         if not db.is_absolute():
             db = root / db
@@ -225,24 +233,44 @@ def main(argv: list[str] | None = None) -> int:
         out = Path(args.out) if args.out else default_slice_path(args.query)
         if not out.is_absolute():
             out = root / out
-        slice_result = export_slice(store, args.query, out, limit=args.limit)
+        slice_result = export_slice(
+            store,
+            args.query,
+            out,
+            limit=args.limit,
+            seed_paths=changed_paths,
+        )
         stats = compute_stats(root, store)
+        source_tokens = stats["source_estimated_tokens"]
+        slice_tokens = slice_result["estimated_tokens"]
+        saving = 1 - (slice_tokens / source_tokens) if source_tokens else 0
         print(
             f"Mapped {map_result.files_seen} files "
             f"({map_result.files_reused} reused, {map_result.files_extracted} extracted)."
         )
-        print(
-            f"Wrote slice {slice_result['out']} "
-            f"(~{slice_result['estimated_tokens']} tokens, "
-            f"{slice_result['estimated_token_ratio']:.2%} of full context)."
-        )
+        print(f"Wrote slice {slice_result['out']}")
         print(f"Manifest: {slice_result['manifest']}")
-        print(f"Full source estimate: {stats['source_estimated_tokens']} tokens.")
+        print(f"Source estimate: {source_tokens} tokens.")
+        print(f"Full context estimate: {slice_result['full_context_estimated_tokens']} tokens.")
+        print(f"Slice estimate: {slice_tokens} tokens.")
+        print(f"Estimated saving: {saving:.2%} vs source.")
+        print(
+            f"Included: {slice_result['file_count']} files, "
+            f"{slice_result['symbol_count']} symbols, {slice_result['direct_edges']} edges."
+        )
+        if args.changed:
+            print(f"Changed files: {len(changed_paths)}")
         print("Read this slice first, then open only the raw files it identifies.")
         return 0
     if args.cmd == "slice":
         out = Path(args.out) if args.out else default_slice_path(args.query)
-        result = export_slice(GraphStore(Path(args.db)), args.query, out, limit=args.limit)
+        result = export_slice(
+            GraphStore(Path(args.db)),
+            args.query,
+            out,
+            limit=args.limit,
+            seed_paths=args.path,
+        )
         print(
             f"Wrote {result['out']} "
             f"({result['written_nodes']} nodes, {result['direct_edges']} edges, "
@@ -252,6 +280,26 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     return 1
+
+
+def _git_lines(root: Path, args: list[str]) -> list[str]:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def _changed_paths(root: Path) -> list[str]:
+    paths: set[str] = set()
+    paths.update(_git_lines(root, ["diff", "--name-only", "--relative"]))
+    paths.update(_git_lines(root, ["diff", "--cached", "--name-only", "--relative"]))
+    paths.update(_git_lines(root, ["ls-files", "--others", "--exclude-standard"]))
+    return sorted(path.replace("\\", "/") for path in paths)
 
 
 if __name__ == "__main__":

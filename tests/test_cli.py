@@ -117,7 +117,10 @@ def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
     assert (tmp_path / ".contextopt" / "slices" / "billing-webhook.md").exists()
     assert (tmp_path / ".contextopt" / "slices" / "billing-webhook.json").exists()
     assert "Read this slice first" in result.stdout
-    assert "of full context" in result.stdout
+    assert "Source estimate:" in result.stdout
+    assert "Slice estimate:" in result.stdout
+    assert "Estimated saving:" in result.stdout
+    assert "Included:" in result.stdout
 
 
 def test_prime_defaults_outputs_under_root_when_called_elsewhere(tmp_path: Path):
@@ -147,3 +150,57 @@ def test_prime_defaults_outputs_under_root_when_called_elsewhere(tmp_path: Path)
     assert (project / ".contextopt" / "context.db").exists()
     assert (project / ".contextopt" / "slices" / "target-symbol.md").exists()
     assert not (outside / ".contextopt").exists()
+
+
+def test_prime_changed_seeds_slice_from_git_changes(tmp_path: Path):
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "app.py").write_text("def stable():\n    return 1\n", encoding="utf-8")
+    (project / "feature.py").write_text("def old_feature():\n    return 1\n", encoding="utf-8")
+    subprocess.run(["git", "init"], cwd=project, capture_output=True, text=True, check=True)
+    subprocess.run(["git", "add", "."], cwd=project, capture_output=True, text=True, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.com",
+            "-c",
+            "user.name=Test User",
+            "commit",
+            "-m",
+            "initial",
+        ],
+        cwd=project,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    (project / "feature.py").write_text(
+        "def changed_feature():\n    return 2\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "unrelated query",
+            "--root",
+            str(project),
+            "--changed",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    slice_text = (project / ".contextopt" / "slices" / "unrelated-query.md").read_text(
+        encoding="utf-8"
+    )
+    assert "feature.py" in slice_text
+    assert "changed_feature" in slice_text
+    assert "Changed files: 1" in result.stdout

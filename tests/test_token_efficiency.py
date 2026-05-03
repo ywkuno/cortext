@@ -61,3 +61,54 @@ def test_export_slice_writes_matching_nodes_and_neighbors(tmp_path: Path) -> Non
     manifest = out.with_suffix(".json").read_text(encoding="utf-8")
     assert '"node_ids"' in manifest
     assert '"full_context_estimated_tokens"' in manifest
+
+
+def test_export_slice_includes_local_imports_and_related_tests(tmp_path: Path) -> None:
+    (tmp_path / "src").mkdir()
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "src" / "app.py").write_text(
+        "import src.helpers\n\n"
+        "def main():\n"
+        "    return src.helpers.greet()\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "src" / "helpers.py").write_text(
+        "def greet():\n"
+        "    return 'hi'\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tests" / "test_app.py").write_text(
+        "def test_main():\n"
+        "    assert True\n",
+        encoding="utf-8",
+    )
+    store = GraphStore(tmp_path / ".contextopt" / "context.db")
+    map_project(tmp_path, store)
+
+    out = tmp_path / ".contextopt" / "slices" / "main.md"
+    result = export_slice(store, "main", out)
+    text = out.read_text(encoding="utf-8")
+
+    assert "src/helpers.py" in text
+    assert "tests/test_app.py" in text
+    assert result["file_count"] >= 3
+    assert result["symbol_count"] >= 2
+
+
+def test_export_slice_accepts_seed_paths_for_changed_files(tmp_path: Path) -> None:
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "feature.py").write_text(
+        "def changed_feature():\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    store = GraphStore(tmp_path / ".contextopt" / "context.db")
+    map_project(tmp_path, store)
+
+    out = tmp_path / ".contextopt" / "slices" / "changed.md"
+    result = export_slice(store, "no textual match", out, seed_paths=["src/feature.py"])
+
+    text = out.read_text(encoding="utf-8")
+    assert "src/feature.py" in text
+    assert "changed_feature" in text
+    assert result["seeded_paths"] == ["src/feature.py"]

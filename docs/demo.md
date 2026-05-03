@@ -19,6 +19,14 @@ contextopt prime "main"
 
 This creates a local `.contextopt/context.db` SQLite graph and a focused `.contextopt/slices/main.md` file. Generated `.contextopt/` files are local working artifacts and should not be committed.
 
+During an edit session, seed the slice with changed, staged, and untracked Git files:
+
+```bash
+contextopt prime "current task" --changed
+```
+
+The command prints source, full-context, and slice token estimates plus an estimated saving percentage.
+
 ## 3. Review Token Estimates
 
 ```bash

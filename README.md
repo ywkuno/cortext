@@ -91,7 +91,8 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `contextopt export --format md` | Export a Markdown context pack. |
 | `contextopt export --format json` | Export stable graph JSON. |
 | `contextopt export --format dot` | Export DOT graph data. |
-| `contextopt prime "topic"` | Map the repo and write a focused slice in one step. |
+| `contextopt prime "topic"` | Map the repo, write a focused slice, and print a savings report. |
+| `contextopt prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
 | `contextopt visualize` | Generate a static browser viewer. |
 | `contextopt activity adapt-tool-log` | Convert simple safe tool-event JSONL into Cortext activity JSONL. |
 | `contextopt activity normalize` | Normalize safe JSONL activity events into replay JSON. |
@@ -109,7 +110,15 @@ contextopt prime "billing webhook"
 contextopt visualize --context .contextopt/slices/billing-webhook.json --outdir .contextopt/visual
 ```
 
-That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, and writes a JSON manifest for the viewer. The viewer highlights included nodes and shows the slice estimate against the full graph context estimate. The assistant should still verify important details in raw source files before editing.
+That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings.
+
+During active edits, seed the slice from Git changes:
+
+```bash
+contextopt prime "what I am changing" --changed
+```
+
+The assistant should read the slice first, then verify important details in raw source files before editing.
 
 ## Privacy Model
 

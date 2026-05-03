@@ -36,6 +36,22 @@ def test_query_ranks_exact_symbol_match_before_path_match(tmp_path: Path):
     assert rows[0]["score"] > rows[1]["score"]
 
 
+def test_query_matches_multi_term_tokens_and_simple_stems(tmp_path: Path):
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "ranking.py").write_text(
+        "def build_savings_report():\n    return {}\n",
+        encoding="utf-8",
+    )
+    store = GraphStore(tmp_path / ".contextopt" / "context.db")
+    map_project(tmp_path, store)
+
+    rows = query_graph(store, "slice ranking changed files savings", limit=5)
+
+    assert rows
+    assert rows[0]["path"] == "src/ranking.py"
+    assert any(row["name"] == "build_savings_report" for row in rows)
+
+
 def test_markdown_export_respects_size_budgets(tmp_path: Path):
     store = GraphStore(tmp_path / ".contextopt" / "context.db")
     run_id = store.create_run(str(tmp_path), "now")
