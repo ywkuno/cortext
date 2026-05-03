@@ -22,6 +22,7 @@ ruff check .
 codeprism map .
 codeprism export --format md --out .contextopt/context-pack.md
 codeprism export --format json --out .contextopt/context-pack.json
+codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
 codeprism stats

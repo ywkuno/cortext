@@ -57,13 +57,21 @@ The prime/slice workflow writes:
 - `.contextopt/slices/main.md` for an assistant-readable context slice
 - `.contextopt/slices/main.json` for the viewer context overlay
 
+Read progressively instead of opening whole files by default:
+
+```bash
+codeprism read src/app.py --mode map
+codeprism read src/app.py --mode signatures
+codeprism read src/app.py --mode diff
+```
+
 Fetch exact source for a mapped node before opening whole files:
 
 ```bash
 codeprism get function::src/app.py::main
 ```
 
-The command prints only the mapped source span for that node, with line and token estimate metadata.
+Use `--mode full` only when the cheaper map, signatures, diff, slice, or exact node output is insufficient. The get command prints only the mapped source span for that node, with line and token estimate metadata.
 
 ## 5. Replay Activity
 

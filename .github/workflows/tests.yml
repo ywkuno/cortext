@@ -32,6 +32,7 @@ jobs:
           codeprism map .
           codeprism export --format md --out .contextopt/context-pack.md
           codeprism export --format json --out .contextopt/context-pack.json
+          codeprism read README.md --mode signatures
           codeprism get "heading::README.md::Quick Start"
           codeprism activity adapt-tool-log examples/tool-events.sample.jsonl --out .contextopt/activity-events.jsonl
           codeprism activity normalize examples/activity-stream.sample.jsonl --out .contextopt/activity-stream.json

@@ -22,6 +22,7 @@ from .integrations import (
 )
 from .mapper import map_project
 from .query import query_graph
+from .read_modes import ReadError, format_read_result, read_path
 from .retrieval import RetrievalError, format_retrieved_source, retrieve_source
 from .slicer import default_slice_path, export_slice
 from .stats import compute_stats, format_stats
@@ -66,6 +67,11 @@ def main(argv: list[str] | None = None) -> int:
     p_get.add_argument("node_id")
     p_get.add_argument("--root", default=".")
     p_get.add_argument("--db", default=".contextopt/context.db")
+    p_read = sub.add_parser("read", help="Read a file through token-aware modes.")
+    p_read.add_argument("path")
+    p_read.add_argument("--mode", choices=["map", "signatures", "diff", "full"], default="map")
+    p_read.add_argument("--root", default=".")
+    p_read.add_argument("--db", default=".contextopt/context.db")
     p_stats = sub.add_parser("stats", help="Show local token and graph statistics.")
     p_stats.add_argument("root", nargs="?", default=".")
     p_stats.add_argument("--db", default=".contextopt/context.db")
@@ -324,6 +330,20 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
         print(format_retrieved_source(result), end="")
+        return 0
+    if args.cmd == "read":
+        try:
+            store = GraphStore(Path(args.db)) if args.mode in {"map", "signatures"} else None
+            result = read_path(
+                root=Path(args.root).resolve(),
+                path=args.path,
+                mode=args.mode,
+                store=store,
+            )
+        except ReadError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        print(format_read_result(result), end="")
         return 0
     if args.cmd == "stats":
         stats = compute_stats(Path(args.root), GraphStore(Path(args.db)))

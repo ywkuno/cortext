@@ -24,6 +24,7 @@ codeprism init
 codeprism map .
 codeprism export --format md --out .contextopt/context-pack.md
 codeprism export --format json --out .contextopt/context-pack.json
+codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
 codeprism prime main
 codeprism prime "current task" --changed
@@ -73,6 +74,7 @@ Then inspect generated files under `.contextopt/`.
 - `codeprism prime <task> --artifact-dir <dir> --readonly-root` routes generated artifacts outside a target repo and refuses root writes.
 - Prime prints source, full-context, slice, estimated saving, included file/symbol/edge counts, and changed-file count when used.
 - `codeprism get <node-id>` prints exact source for mapped file, doc, and symbol nodes, using stable node IDs from slices, query results, or graph JSON.
+- `codeprism read <path> --mode map|signatures|diff|full` lets agents inspect file shape, symbols, or one-file diffs before explicitly reading full files.
 - `codeprism slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .contextopt/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `codeprism install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `codeprism prime` before broad file reads.

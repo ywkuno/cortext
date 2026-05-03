@@ -41,6 +41,7 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Reuses file hashes so unchanged files are not rescanned.
 - Runs `codeprism prime "<task>"` to map the repo and write a targeted slice in one step.
 - Fetches exact mapped source with `codeprism get <node-id>` so agents can inspect one symbol or file before opening broader code.
+- Reads files through token-aware modes with `codeprism read <path> --mode map|signatures|diff|full`.
 - Estimates context size and creates targeted Markdown slices for focused work.
 - Routes generated artifacts outside a target repo with `--artifact-dir` and `--readonly-root`.
 - Exports Markdown, JSON, DOT, and static browser visualizations.
@@ -129,6 +130,10 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
 | `codeprism prime "topic" --artifact-dir <dir> --readonly-root` | Write prime artifacts outside the target repo and refuse root writes. |
 | `codeprism get <node-id>` | Print exact source for a mapped file, doc, or symbol node. |
+| `codeprism read <path> --mode map` | Print mapped nodes for a file without source bodies. |
+| `codeprism read <path> --mode signatures` | Print mapped symbols/headings/routes without source bodies. |
+| `codeprism read <path> --mode diff` | Print only the working-tree diff for one path. |
+| `codeprism read <path> --mode full` | Explicitly print the full file. |
 | `codeprism visualize` | Generate a static browser viewer. |
 | `codeprism activity adapt-tool-log` | Convert simple safe tool-event JSONL into CodePrism activity JSONL. |
 | `codeprism activity normalize` | Normalize safe JSONL activity events into replay JSON. |
@@ -145,11 +150,12 @@ Use CodePrism as a preflight step before broad code reading:
 
 ```bash
 codeprism prime "billing webhook"
+codeprism read src/app.py --mode signatures
 codeprism get function::src/app.py::billing_webhook
 codeprism visualize --context .contextopt/slices/billing-webhook.json --outdir .contextopt/visual
 ```
 
-That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings. The get command uses stable node IDs from slices, query results, or graph JSON to return only the requested source span.
+That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings. The read command lets an agent inspect file shape before bodies, and the get command uses stable node IDs from slices, query results, or graph JSON to return only the requested source span.
 
 During active edits, seed the slice from Git changes:
 
@@ -196,6 +202,7 @@ pytest
 ruff check .
 codeprism map .
 codeprism export --format json --out .contextopt/context-pack.json
+codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
 codeprism slice main --out .contextopt/slices/main.md

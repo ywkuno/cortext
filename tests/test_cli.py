@@ -186,6 +186,166 @@ def test_get_command_returns_nonzero_for_missing_node(tmp_path: Path):
     assert "node not found" in result.stderr.lower()
 
 
+def test_read_map_mode_prints_file_metadata_without_source_body(tmp_path: Path):
+    (tmp_path / "app.py").write_text(
+        "def target():\n"
+        "    return 'body should stay hidden'\n",
+        encoding="utf-8",
+    )
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "read",
+            "app.py",
+            "--mode",
+            "map",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "# CodePrism Read" in result.stdout
+    assert "- Mode: map" in result.stdout
+    assert "- Path: `app.py`" in result.stdout
+    assert "function::app.py::target" in result.stdout
+    assert "body should stay hidden" not in result.stdout
+
+
+def test_read_signatures_mode_prints_symbols_without_function_bodies(tmp_path: Path):
+    (tmp_path / "app.py").write_text(
+        "class Service:\n"
+        "    def run(self):\n"
+        "        return 'do not include body'\n"
+        "\n"
+        "def helper(value):\n"
+        "    return value + 1\n",
+        encoding="utf-8",
+    )
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "read",
+            "app.py",
+            "--mode",
+            "signatures",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "- `class::app.py::Service` class Service L1-3" in result.stdout
+    assert "- `method::app.py::run` method run L2-3" in result.stdout
+    assert "- `function::app.py::helper` function helper L5-6" in result.stdout
+    assert "do not include body" not in result.stdout
+    assert "return value + 1" not in result.stdout
+
+
+def test_read_diff_mode_prints_git_diff_for_one_path(tmp_path: Path):
+    (tmp_path / "app.py").write_text("def target():\n    return 1\n", encoding="utf-8")
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, text=True, check=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True, text=True, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.email=test@example.com",
+            "-c",
+            "user.name=Test User",
+            "commit",
+            "-m",
+            "initial",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    (tmp_path / "app.py").write_text("def target():\n    return 2\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "read",
+            "app.py",
+            "--mode",
+            "diff",
+            "--root",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "diff --git" in result.stdout
+    assert "-    return 1" in result.stdout
+    assert "+    return 2" in result.stdout
+
+
+def test_read_full_mode_prints_whole_file(tmp_path: Path):
+    (tmp_path / "app.py").write_text("def target():\n    return 1\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "read",
+            "app.py",
+            "--mode",
+            "full",
+            "--root",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "- Mode: full" in result.stdout
+    assert "```python" in result.stdout
+    assert "def target():" in result.stdout
+    assert "return 1" in result.stdout
+
+
 def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
     (tmp_path / "app.py").write_text(
         "def billing_webhook():\n    return 'ok'\n",

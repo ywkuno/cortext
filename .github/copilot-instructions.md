@@ -20,4 +20,4 @@ For a read-only target repo, route artifacts outside the repo:
 codeprism prime "topic or symbol" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
 ```
 
-Use the generated `.contextopt/slices/*.md` file as the first source for project structure, important files, and symbol locations. For a specific mapped node, prefer `codeprism get NODE_ID` before opening whole raw files. Verify in raw files before changing code.
+Use the generated `.contextopt/slices/*.md` file as the first source for project structure, important files, and symbol locations. For a specific mapped node, prefer `codeprism get NODE_ID`. For a whole file, prefer `codeprism read PATH --mode signatures` or `--mode diff` before opening the full source. Verify in raw files before changing code.

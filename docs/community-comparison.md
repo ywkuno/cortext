@@ -25,7 +25,7 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
    LeanCTX and CocoIndex Code both make diagnostics part of onboarding. CodePrism now has `codeprism doctor`; next it should diagnose PATH, CLI version, stale skills, missing maps, and stale maps.
 
 5. **Exact retrieval, not only search.**
-   jCodeMunch is compelling because an agent can fetch a symbol, outline, or compact bundle instead of opening whole files. CodePrism now has `codeprism get`; next it should add `codeprism read --mode`.
+   jCodeMunch is compelling because an agent can fetch a symbol, outline, or compact bundle instead of opening whole files. CodePrism now has `codeprism get` and `codeprism read --mode`.
 
 6. **Fresh indexes.**
    CocoIndex Code and Graphify emphasize incremental re-indexing. CodePrism already caches unchanged file extraction; next it needs clearer stale-map checks and watch/hook options.
@@ -46,8 +46,8 @@ The visual map is useful, but the public front should keep context saving as the
 - `codeprism setup`: friendly install and doctor flow.
 - `codeprism doctor --json`: shareable diagnostics for agents and bug reports.
 - `codeprism get NODE_ID`: exact source retrieval for a graph node.
-- `codeprism uninstall-integrations`: safe cleanup.
 - `codeprism read PATH --mode map|signatures|diff|full`: token-aware file read modes.
+- `codeprism uninstall-integrations`: safe cleanup.
 - `codeprism mcp`: expose prime/query/slice/get/read/stats as MCP tools.
 - `codeprism gain`: report estimated saved tokens from slices and cache reuse.
 - `codeprism benchmark fixtures/`: reproducible token-saving examples.
