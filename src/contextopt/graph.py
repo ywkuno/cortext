@@ -172,6 +172,25 @@ class GraphStore:
     ) -> None:
         self.conn.execute("DELETE FROM node_cache WHERE rel_path = ?", (rel_path,))
         self.conn.execute("DELETE FROM edge_cache WHERE rel_path = ?", (rel_path,))
+
+        unique_nodes: list[dict[str, object]] = []
+        seen_nodes: set[tuple[object, ...]] = set()
+        for node in nodes:
+            key = (node["kind"], node["path"], node["name"], node["start_line"])
+            if key in seen_nodes:
+                continue
+            seen_nodes.add(key)
+            unique_nodes.append(node)
+
+        unique_edges: list[dict[str, object]] = []
+        seen_edges: set[tuple[object, ...]] = set()
+        for edge in edges:
+            key = (edge["source"], edge["target"], edge["kind"])
+            if key in seen_edges:
+                continue
+            seen_edges.add(key)
+            unique_edges.append(edge)
+
         self.conn.executemany(
             """
             INSERT INTO node_cache(rel_path, sha256, kind, path, name, start_line, end_line, meta_json)
@@ -188,7 +207,7 @@ class GraphStore:
                     node["end_line"],
                     node["meta_json"],
                 )
-                for node in nodes
+                for node in unique_nodes
             ],
         )
         self.conn.executemany(
@@ -205,7 +224,7 @@ class GraphStore:
                     edge["kind"],
                     edge["meta_json"],
                 )
-                for edge in edges
+                for edge in unique_edges
             ],
         )
 

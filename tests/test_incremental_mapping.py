@@ -50,3 +50,32 @@ def test_changed_file_is_extracted_and_replaces_previous_nodes(tmp_path: Path):
         for row in store.rows("SELECT name FROM nodes WHERE kind = 'function' ORDER BY name")
     ]
     assert names == ["new_name"]
+
+
+def test_cached_extraction_deduplicates_duplicate_nodes_and_edges(tmp_path: Path):
+    store = GraphStore(tmp_path / ".codeprism" / "context.db")
+    duplicate_node = {
+        "kind": "file",
+        "path": "app.py",
+        "name": "app.py",
+        "start_line": 1,
+        "end_line": 1,
+        "meta_json": "{}",
+    }
+    duplicate_edge = {
+        "source": "folder::.",
+        "target": "file::app.py",
+        "kind": "contains",
+        "meta_json": "{}",
+    }
+
+    store.replace_cached_extraction(
+        rel_path="app.py",
+        sha256="abc123",
+        nodes=[duplicate_node, dict(duplicate_node)],
+        edges=[duplicate_edge, dict(duplicate_edge)],
+    )
+    store.commit()
+
+    assert len(store.cached_nodes("app.py", "abc123")) == 1
+    assert len(store.cached_edges("app.py", "abc123")) == 1
