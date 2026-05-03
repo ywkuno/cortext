@@ -57,6 +57,14 @@ The prime/slice workflow writes:
 - `.contextopt/slices/main.md` for an assistant-readable context slice
 - `.contextopt/slices/main.json` for the viewer context overlay
 
+Fetch exact source for a mapped node before opening whole files:
+
+```bash
+codeprism get function::src/app.py::main
+```
+
+The command prints only the mapped source span for that node, with line and token estimate metadata.
+
 ## 5. Replay Activity
 
 ```bash

@@ -22,4 +22,4 @@ For a read-only target repo, route artifacts outside the repo:
 codeprism prime "$ARGUMENTS" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
 ```
 
-Then read the generated slice Markdown first. Inspect raw files only after the slice identifies the likely relevant paths and symbols.
+Then read the generated slice Markdown first. Use `codeprism get NODE_ID` for exact mapped source before opening whole raw files.

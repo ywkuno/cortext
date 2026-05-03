@@ -5,6 +5,7 @@
 - Repositioned CodePrism around context saving and token optimization, with visualization documented as an optional inspection layer.
 - Added `codeprism prime <task>` to map a repo, write a focused context slice, and print a savings report in one step.
 - Added `codeprism prime <task> --changed` to seed slices from changed, staged, and untracked Git files.
+- Added `codeprism get <node-id>` to print exact source for a mapped file, doc, or symbol node.
 - Improved slice ranking with tokenized/stemmed matching, local import expansion, changed-path seeds, and related test inclusion.
 - Added `codeprism install-integrations` for local Codex, Claude, and Copilot helpers.
 - Added project-level Claude commands, including `/context-slice`, and Copilot instructions for slice-first workflows.

@@ -30,21 +30,27 @@ codeprism prime "topic, file, symbol, or bug" --root PATH_TO_REPO --artifact-dir
 ```
 
 2. Read the generated slice Markdown first. By default it is under `.contextopt/slices/`; with `--artifact-dir`, it is under that artifact directory.
-3. Open only the raw files named in the slice unless the slice is clearly insufficient.
-4. For broader orientation, refresh the map and stats:
+3. Use exact retrieval for specific mapped nodes before opening whole raw files:
+
+```bash
+codeprism get NODE_ID
+```
+
+4. Open raw files only when the slice and exact node source are clearly insufficient.
+5. For broader orientation, refresh the map and stats:
 
 ```bash
 codeprism map .
 codeprism stats
 ```
 
-5. If CodePrism behavior seems stale, check the installed helpers:
+6. If CodePrism behavior seems stale, check the installed helpers:
 
 ```bash
 codeprism doctor
 ```
 
-6. Use the visual map as a bonus inspection layer, not the first step:
+7. Use the visual map as a bonus inspection layer, not the first step:
 
 ```bash
 codeprism visualize --context .contextopt/slices/<slice>.json
@@ -55,7 +61,7 @@ codeprism visualize --context .contextopt/slices/<slice>.json
 - Prefer deterministic context pack facts over guesses.
 - If the map is stale, refresh it.
 - Do not send private project files to external APIs.
-- Ask for raw files only after consulting the slice or map.
+- Ask for raw files only after consulting the slice, map, or `codeprism get` output.
 - Treat token counts as estimates, not billing-grade measurements.
 - Prefer `--changed` when there are local edits, staged changes, or new files.
 - Use `--artifact-dir` and `--readonly-root` when the target repository must stay untouched.

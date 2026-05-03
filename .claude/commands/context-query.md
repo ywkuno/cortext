@@ -12,4 +12,4 @@ codeprism prime "$ARGUMENTS"
 
 For read-only target repos, use `codeprism prime "$ARGUMENTS" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root`.
 
-Then read the generated slice Markdown and inspect only the highest-relevance raw files if more detail is needed. Answer with file paths and line references where possible.
+Then read the generated slice Markdown. If a specific node ID is relevant, run `codeprism get NODE_ID` before opening whole raw files. Answer with file paths and line references where possible.

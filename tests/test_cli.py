@@ -110,6 +110,82 @@ def test_activity_normalize_command_writes_safe_payload(tmp_path: Path):
     assert "1 warnings" in result.stdout
 
 
+def test_get_command_prints_exact_symbol_source(tmp_path: Path):
+    source = (
+        "def target():\n"
+        "    value = 41\n"
+        "    return value + 1\n"
+        "\n"
+        "def noisy_neighbor():\n"
+        "    return 'skip me'\n"
+    )
+    (tmp_path / "app.py").write_text(source, encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "get",
+            "function::app.py::target",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "- Node: `function::app.py::target`" in result.stdout
+    assert "- Lines: 1-3" in result.stdout
+    assert "def target():" in result.stdout
+    assert "return value + 1" in result.stdout
+    assert "noisy_neighbor" not in result.stdout
+
+
+def test_get_command_returns_nonzero_for_missing_node(tmp_path: Path):
+    (tmp_path / "app.py").write_text("def target():\n    return 1\n", encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "get",
+            "function::app.py::missing",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "node not found" in result.stderr.lower()
+
+
 def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
     (tmp_path / "app.py").write_text(
         "def billing_webhook():\n    return 'ok'\n",
