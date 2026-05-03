@@ -1,0 +1,2 @@
+max_file_bytes = 500000
+ignore = ["node_modules", ".git", "dist", "build", ".next"]
