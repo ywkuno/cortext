@@ -1,6 +1,6 @@
 # Cortext Demo
 
-This walkthrough shows the public demo loop for Cortext on any local repository.
+This walkthrough shows the public context-saving loop for Cortext on any local repository. The visual map is included as an inspection bonus; the main path is slice-first.
 
 ## 1. Install
 
@@ -10,33 +10,32 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-## 2. Map The Repo
+## 2. Prime A Task
 
 ```bash
 contextopt init
-contextopt map .
+contextopt prime "main"
 ```
 
-This creates a local `.contextopt/context.db` SQLite graph. Generated `.contextopt/` files are local working artifacts and should not be committed.
+This creates a local `.contextopt/context.db` SQLite graph and a focused `.contextopt/slices/main.md` file. Generated `.contextopt/` files are local working artifacts and should not be committed.
 
-## 3. Export Context
+## 3. Review Token Estimates
 
 ```bash
-contextopt export --format md --out .contextopt/context-pack.md
-contextopt export --format json --out .contextopt/context-pack.json
 contextopt stats
 ```
 
 The stats command reports local estimated token counts for source, graph, and context-pack outputs. These are estimates for comparison, not benchmark claims.
 
-## 4. Create A Focused Slice
+## 4. Install Agent Helpers
 
 ```bash
-contextopt query "main"
-contextopt slice main --out .contextopt/slices/main.md
+contextopt install-integrations --target all --force
 ```
 
-The slice command writes:
+Restart Codex/Claude after installing global skills. The helpers tell agents to run `contextopt prime "<task>"` before broad file reads.
+
+The prime/slice workflow writes:
 
 - `.contextopt/slices/main.md` for an assistant-readable context slice
 - `.contextopt/slices/main.json` for the viewer context overlay
@@ -50,7 +49,7 @@ contextopt activity normalize examples/activity-stream.sample.jsonl --out .conte
 
 The adapter is intentionally simple and safe. It converts explicit tool-event rows into Cortext activity JSONL. It does not read private agent session logs.
 
-## 6. Open The Viewer
+## 6. Open The Optional Viewer
 
 ```bash
 contextopt visualize \

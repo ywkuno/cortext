@@ -7,6 +7,8 @@
 - MVP3 = animated pixel brain / agent replay.
 - MVP4 = token optimization and targeted context slices.
 
+Context saving is the main product direction. Visuals are the inspection and gamified replay layer, not the primary value claim.
+
 ## Phase 0 — Starter scaffold
 
 - CLI skeleton
@@ -84,12 +86,15 @@
 
 - `contextopt stats` for source, graph, and context-pack token estimates
 - `contextopt slice <path-or-symbol>` for targeted Markdown context packs
+- `contextopt prime <task>` as the one-command agent preflight: map, estimate, slice, then read the slice first
 - Slice JSON manifests for context-inclusion overlays
 - Viewer compares slice tokens against full graph context estimate
 - Viewer highlights context-included nodes
 - Query-first workflow docs for Codex/Claude usage
+- Local Codex/Claude skill installation so agents actually use slices before broad reads
 - Honest estimated token reporting rather than benchmark claims
-- Future: rank slices by imports, call graph, changed files, and docs mentions
+- Next: rank slices by imports, changed files, docs mentions, call graph signals, and recent activity
+- Next: benchmark Cortext slices against full-source packs and other repo-packing tools using reproducible fixtures
 
 ## Phase 5 — Agent integrations
 
@@ -99,6 +104,7 @@
 - Copilot instruction templates
 - VS Code task definitions
 - `contextopt install-integrations`
+- Project command for slice-first work: `/context-slice`
 
 ## Phase 6 — Advanced graph intelligence
 

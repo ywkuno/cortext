@@ -87,3 +87,63 @@ def test_activity_normalize_command_writes_safe_payload(tmp_path: Path):
     assert len(payload["warnings"]) == 1
     assert "1 events" in result.stdout
     assert "1 warnings" in result.stdout
+
+
+def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
+    (tmp_path / "app.py").write_text(
+        "def billing_webhook():\n    return 'ok'\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "billing webhook",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(tmp_path / ".contextopt" / "context.db"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / ".contextopt" / "slices" / "billing-webhook.md").exists()
+    assert (tmp_path / ".contextopt" / "slices" / "billing-webhook.json").exists()
+    assert "Read this slice first" in result.stdout
+    assert "of full context" in result.stdout
+
+
+def test_prime_defaults_outputs_under_root_when_called_elsewhere(tmp_path: Path):
+    project = tmp_path / "project"
+    outside = tmp_path / "outside"
+    project.mkdir()
+    outside.mkdir()
+    (project / "app.py").write_text("def target_symbol():\n    return 1\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "target symbol",
+            "--root",
+            str(project),
+        ],
+        cwd=outside,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (project / ".contextopt" / "context.db").exists()
+    assert (project / ".contextopt" / "slices" / "target-symbol.md").exists()
+    assert not (outside / ".contextopt").exists()
