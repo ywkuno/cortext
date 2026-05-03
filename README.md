@@ -1,6 +1,6 @@
 # CodePrism
 
-[![Tests](https://github.com/ywkuno/cortext/actions/workflows/tests.yml/badge.svg)](https://github.com/ywkuno/cortext/actions/workflows/tests.yml)
+[![Tests](https://github.com/ywkuno/codeprism/actions/workflows/tests.yml/badge.svg)](https://github.com/ywkuno/codeprism/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Local-first context saving for AI coding agents.
