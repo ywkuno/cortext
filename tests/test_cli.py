@@ -346,6 +346,59 @@ def test_read_full_mode_prints_whole_file(tmp_path: Path):
     assert "return 1" in result.stdout
 
 
+def test_gain_command_reports_savings_and_map_freshness(tmp_path: Path):
+    app = tmp_path / "app.py"
+    app.write_text("def main():\n    return 1\n", encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "gain",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "# CodePrism Gain" in result.stdout
+    assert "Source -> context pack saving" in result.stdout
+    assert "Map status: current" in result.stdout
+
+    app.write_text("def main():\n    return 1000\n", encoding="utf-8")
+    stale_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "gain",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert stale_result.returncode == 0, stale_result.stderr
+    assert "Map status: stale" in stale_result.stdout
+    assert "Changed files: 1" in stale_result.stdout
+
+
 def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
     (tmp_path / "app.py").write_text(
         "def billing_webhook():\n    return 'ok'\n",

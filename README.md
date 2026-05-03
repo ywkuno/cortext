@@ -17,9 +17,10 @@ The goal is simple: **map first, slice next, read raw files only when they matte
 pip install -e ".[dev]"
 codeprism setup
 codeprism prime "server boot path"
+codeprism gain
 ```
 
-`codeprism setup` installs Codex/Claude/Copilot helper files and verifies them with `codeprism doctor`. `codeprism prime` maps the repo, writes a focused slice, and prints estimated token savings.
+`codeprism setup` installs Codex/Claude/Copilot helper files and verifies them with `codeprism doctor`. `codeprism prime` maps the repo, writes a focused slice, and prints estimated token savings. `codeprism gain` reports estimated savings again later and warns when the map is stale.
 
 The legacy `contextopt` command remains available for existing scripts while the public CLI moves to `codeprism`. Internal Python imports still use the `contextopt` package.
 
@@ -43,6 +44,7 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Fetches exact mapped source with `codeprism get <node-id>` so agents can inspect one symbol or file before opening broader code.
 - Reads files through token-aware modes with `codeprism read <path> --mode map|signatures|diff|full`.
 - Estimates context size and creates targeted Markdown slices for focused work.
+- Reports estimated saved tokens and stale-map status with `codeprism gain`.
 - Routes generated artifacts outside a target repo with `--artifact-dir` and `--readonly-root`.
 - Exports Markdown, JSON, DOT, and static browser visualizations.
 - Generates stable graph data for tool integration and optional visual inspection.
@@ -56,6 +58,7 @@ The core loop is usable today:
 
 - map a repository into a local SQLite graph
 - estimate context size and generate focused slices
+- check whether the graph is stale before trusting map output
 - install and verify Codex/Claude/Copilot helpers that nudge agents toward slice-first exploration
 - export Markdown, JSON, DOT, and static HTML views
 - inspect/search/filter the visual map as a bonus layer
@@ -139,6 +142,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism activity normalize` | Normalize safe JSONL activity events into replay JSON. |
 | `codeprism query "topic"` | Rank relevant files and symbols. |
 | `codeprism stats` | Estimate source, graph, and pack token sizes. |
+| `codeprism gain` | Report estimated token savings and map freshness. |
 | `codeprism slice <target>` | Export focused Markdown plus a JSON context overlay manifest. |
 | `codeprism setup` | Install and verify agent helper files in one step. |
 | `codeprism install-integrations` | Install local Codex/Claude/Copilot helper files. |
@@ -150,12 +154,13 @@ Use CodePrism as a preflight step before broad code reading:
 
 ```bash
 codeprism prime "billing webhook"
+codeprism gain
 codeprism read src/app.py --mode signatures
 codeprism get function::src/app.py::billing_webhook
 codeprism visualize --context .contextopt/slices/billing-webhook.json --outdir .contextopt/visual
 ```
 
-That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings. The read command lets an agent inspect file shape before bodies, and the get command uses stable node IDs from slices, query results, or graph JSON to return only the requested source span.
+That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings. The gain command repeats the savings report and warns if files changed after the last map. The read command lets an agent inspect file shape before bodies, and the get command uses stable node IDs from slices, query results, or graph JSON to return only the requested source span.
 
 During active edits, seed the slice from Git changes:
 
@@ -204,6 +209,7 @@ codeprism map .
 codeprism export --format json --out .contextopt/context-pack.json
 codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
+codeprism gain
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
 codeprism slice main --out .contextopt/slices/main.md
 codeprism visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
@@ -215,7 +221,7 @@ CI runs tests, Ruff, and a CLI smoke path across Python 3.10, 3.11, and 3.12.
 
 ## Roadmap
 
-Near-term work is focused on improving slice ranking, adding git-diff-aware context, measuring real token savings, and deepening static extraction without making the tool heavyweight. Visual polish is still planned, but context savings stay the main product. See `docs/roadmap.md` for the current plan.
+Near-term work is focused on improving slice ranking, adding git-diff-aware context, benchmark fixtures for measured token savings, and deepening static extraction without making the tool heavyweight. Visual polish is still planned, but context savings stay the main product. See `docs/roadmap.md` for the current plan.
 
 ## Support
 

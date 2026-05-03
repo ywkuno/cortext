@@ -34,6 +34,7 @@ codeprism activity normalize examples/activity-stream.sample.jsonl --out .contex
 codeprism visualize --outdir .contextopt/visual
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
 codeprism stats
+codeprism gain
 codeprism slice main --out .contextopt/slices/main.md
 codeprism visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
 codeprism setup --target project
@@ -54,6 +55,7 @@ Then inspect generated files under `.contextopt/`.
 7. Add `codeprism stats`.
 8. Add `codeprism slice <path-or-symbol>` for targeted context packs.
 9. Add and use integration installer.
+10. Add `codeprism gain` for token-savings and map-freshness reporting.
 
 ## Current visualization work
 
@@ -68,13 +70,14 @@ Then inspect generated files under `.contextopt/`.
 - MVP2.6 makes multi-column repo tree the default layout and keeps cluster grid as an alternate view.
 - MVP2.7 adds semantic `meta.role` classification plus role filter, role legend, role colors, and role badges in the viewer.
 - MVP3 replay supports `from_node_id`, `to_node_id`, `duration_ms`, estimated/actual token fields, timeline controls, speed control, one marker per agent, activity trails, searchable event list, run/agent filters, jump-to-node, touched-only mode, and current-event HUD text.
-- MVP4 token workflow starts with `codeprism stats`, `codeprism query`, and `codeprism slice`.
+- MVP4 token workflow starts with `codeprism stats`, `codeprism gain`, `codeprism query`, and `codeprism slice`.
 - `codeprism prime <task>` maps, estimates, and writes a focused slice in one step.
 - `codeprism prime <task> --changed` seeds the slice with changed, staged, and untracked Git files.
 - `codeprism prime <task> --artifact-dir <dir> --readonly-root` routes generated artifacts outside a target repo and refuses root writes.
 - Prime prints source, full-context, slice, estimated saving, included file/symbol/edge counts, and changed-file count when used.
 - `codeprism get <node-id>` prints exact source for mapped file, doc, and symbol nodes, using stable node IDs from slices, query results, or graph JSON.
 - `codeprism read <path> --mode map|signatures|diff|full` lets agents inspect file shape, symbols, or one-file diffs before explicitly reading full files.
+- `codeprism gain` reports estimated saved tokens and warns when files changed after the latest map.
 - `codeprism slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .contextopt/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `codeprism install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `codeprism prime` before broad file reads.

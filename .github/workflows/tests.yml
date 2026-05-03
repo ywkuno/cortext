@@ -39,6 +39,7 @@ jobs:
           codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .contextopt/visual
           codeprism stats
           codeprism slice main --out .contextopt/slices/main.md
+          codeprism gain
           codeprism visualize --context .contextopt/slices/main.json --outdir .contextopt/visual
           codeprism setup --target project
           codeprism doctor --target project

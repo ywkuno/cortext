@@ -91,6 +91,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - `codeprism prime <task> --artifact-dir <dir> --readonly-root` supports read-only repos and CI artifact routing
 - `codeprism get <node-id>` prints exact source for a mapped file, doc, or symbol node
 - `codeprism read <path> --mode map|signatures|diff|full` supports progressive, token-aware file reading
+- `codeprism gain` reports estimated saved tokens and stale-map status
 - `codeprism setup` installs/refreshes agent helpers and runs `codeprism doctor`
 - `codeprism doctor` checks whether helper files are present and current
 - Prime output includes source, full-context, slice, estimated saving, file count, symbol count, and edge count
@@ -104,8 +105,9 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Honest estimated token reporting rather than benchmark claims
 - Next: rank slices by call graph signals, richer docs mentions, recent activity, and per-language ownership hints
 - Next: benchmark CodePrism slices against full-source packs and other repo-packing tools using reproducible fixtures
+- Next: add staged-diff support to `codeprism read --mode diff`
 - Next: improve read signatures with language-aware argument/type summaries where deterministic parsers support them
-- Next: expose prime/query/slice/get/read/stats through `codeprism mcp`
+- Next: expose prime/query/slice/get/read/gain/stats through `codeprism mcp`
 
 ## Phase 5 — Agent integrations
 

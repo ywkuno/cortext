@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .freshness import compute_freshness
 from .graph import GraphStore
 from .scanner import scan_files
 from .token_estimator import estimate_tokens
@@ -13,8 +14,17 @@ def _rows_count(store: GraphStore, table: str) -> int:
     return int(store.rows(f"SELECT count(*) AS count FROM {table}")[0]["count"])
 
 
-def _source_text_token_count(root: Path) -> tuple[int, int, int]:
-    files = scan_files(root)
+def _source_text_token_count(
+    root: Path,
+    *,
+    max_file_bytes: int = 500_000,
+    ignore_patterns: list[str] | None = None,
+) -> tuple[int, int, int]:
+    files = scan_files(
+        root,
+        max_file_bytes=max_file_bytes,
+        ignore_patterns=ignore_patterns,
+    )
     byte_count = 0
     token_count = 0
     for scanned in files:
@@ -51,14 +61,30 @@ def _context_pack_token_count(store: GraphStore) -> int:
     return estimate_tokens(json.dumps(payload, sort_keys=True))
 
 
-def compute_stats(root: Path, store: GraphStore) -> dict[str, Any]:
+def compute_stats(
+    root: Path,
+    store: GraphStore,
+    *,
+    max_file_bytes: int = 500_000,
+    ignore_patterns: list[str] | None = None,
+) -> dict[str, Any]:
     root = root.resolve()
-    mapped_files, source_bytes, source_tokens = _source_text_token_count(root)
+    mapped_files, source_bytes, source_tokens = _source_text_token_count(
+        root,
+        max_file_bytes=max_file_bytes,
+        ignore_patterns=ignore_patterns,
+    )
     graph_nodes = _rows_count(store, "nodes")
     graph_edges = _rows_count(store, "edges")
     graph_tokens = _graph_token_count(store)
     context_tokens = _context_pack_token_count(store)
     ratio = round(context_tokens / source_tokens, 4) if source_tokens else 0
+    freshness = compute_freshness(
+        root,
+        store,
+        max_file_bytes=max_file_bytes,
+        ignore_patterns=ignore_patterns,
+    )
     return {
         "root": str(root),
         "mapped_files": mapped_files,
@@ -69,6 +95,7 @@ def compute_stats(root: Path, store: GraphStore) -> dict[str, Any]:
         "graph_estimated_tokens": graph_tokens,
         "context_pack_estimated_tokens": context_tokens,
         "estimated_token_ratio": ratio,
+        "freshness": freshness,
     }
 
 
@@ -85,5 +112,7 @@ def format_stats(stats: dict[str, Any]) -> str:
         f"- Graph estimated tokens: {stats['graph_estimated_tokens']}",
         f"- Context pack estimated tokens: {stats['context_pack_estimated_tokens']}",
         f"- Context/source token ratio: {stats['estimated_token_ratio']}",
+        f"- Map status: {stats['freshness']['status']}",
+        f"- Stale files: {stats['freshness']['stale_count']}",
     ]
     return "\n".join(lines)

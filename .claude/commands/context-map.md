@@ -8,6 +8,7 @@ Run:
 codeprism init
 codeprism map .
 codeprism stats
+codeprism gain
 ```
 
-Then summarize project shape, likely entrypoints, parser coverage, and the best query to slice next. Avoid broad raw file reads unless the map is insufficient.
+Then summarize project shape, likely entrypoints, parser coverage, map freshness, estimated savings, and the best query to slice next. Avoid broad raw file reads unless the map is insufficient.

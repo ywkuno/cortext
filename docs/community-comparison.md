@@ -19,16 +19,16 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
    Tools that win do not just generate artifacts. They install skills, commands, MCP servers, hooks, or rules that make agents use the context layer automatically. CodePrism should keep improving Codex/Claude/Copilot helpers and add MCP next.
 
 3. **Visible proof of savings.**
-   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism should add reproducible benchmark fixtures before making stronger public claims.
+   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism now has `codeprism gain`; next it should add reproducible benchmark fixtures before making stronger public claims.
 
 4. **Doctor commands.**
-   LeanCTX and CocoIndex Code both make diagnostics part of onboarding. CodePrism now has `codeprism doctor`; next it should diagnose PATH, CLI version, stale skills, missing maps, and stale maps.
+   LeanCTX and CocoIndex Code both make diagnostics part of onboarding. CodePrism now has `codeprism doctor` and stale-map reporting in `codeprism gain`; next it should diagnose PATH, CLI version, stale skills, and missing maps.
 
 5. **Exact retrieval, not only search.**
    jCodeMunch is compelling because an agent can fetch a symbol, outline, or compact bundle instead of opening whole files. CodePrism now has `codeprism get` and `codeprism read --mode`.
 
 6. **Fresh indexes.**
-   CocoIndex Code and Graphify emphasize incremental re-indexing. CodePrism already caches unchanged file extraction; next it needs clearer stale-map checks and watch/hook options.
+   CocoIndex Code and Graphify emphasize incremental re-indexing. CodePrism already caches unchanged file extraction and reports stale maps; next it needs watch/hook options.
 
 7. **Public polish.**
    Successful repos have a sharp first screen, badges, screenshots/GIFs, a clear support channel, update/uninstall docs, and sponsor plumbing.
@@ -47,9 +47,9 @@ The visual map is useful, but the public front should keep context saving as the
 - `codeprism doctor --json`: shareable diagnostics for agents and bug reports.
 - `codeprism get NODE_ID`: exact source retrieval for a graph node.
 - `codeprism read PATH --mode map|signatures|diff|full`: token-aware file read modes.
+- `codeprism gain`: report estimated saved tokens from slices and map freshness.
 - `codeprism uninstall-integrations`: safe cleanup.
-- `codeprism mcp`: expose prime/query/slice/get/read/stats as MCP tools.
-- `codeprism gain`: report estimated saved tokens from slices and cache reuse.
+- `codeprism mcp`: expose prime/query/slice/get/read/gain/stats as MCP tools.
 - `codeprism benchmark fixtures/`: reproducible token-saving examples.
 - `codeprism watch`: optional local refresh loop for active repos.
 - Public landing assets: short GIF, before/after token example, and cleaner viewer screenshot.

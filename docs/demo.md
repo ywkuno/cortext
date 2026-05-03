@@ -39,9 +39,10 @@ Replace `PATH_TO_REPO` and `PATH_TO_ARTIFACTS` with normal project and output pa
 
 ```bash
 codeprism stats
+codeprism gain
 ```
 
-The stats command reports local estimated token counts for source, graph, and context-pack outputs. These are estimates for comparison, not benchmark claims.
+The stats command reports local estimated token counts for source, graph, and context-pack outputs. The gain command reports estimated saved tokens and warns if files changed after the latest map. These are estimates for comparison, not benchmark claims.
 
 ## 4. Install Agent Helpers
 

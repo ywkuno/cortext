@@ -45,11 +45,12 @@ codeprism read PATH --mode diff
 ```
 
 5. Open full raw files only when the slice, exact node source, signatures, and diff are clearly insufficient.
-6. For broader orientation, refresh the map and stats:
+6. For broader orientation, refresh the map and check the savings/freshness report:
 
 ```bash
 codeprism map .
 codeprism stats
+codeprism gain
 ```
 
 7. If CodePrism behavior seems stale, check the installed helpers:
@@ -68,6 +69,7 @@ codeprism visualize --context .contextopt/slices/<slice>.json
 
 - Prefer deterministic context pack facts over guesses.
 - If the map is stale, refresh it.
+- Use `codeprism gain` when you need to confirm estimated savings or map freshness.
 - Do not send private project files to external APIs.
 - Ask for raw files only after consulting the slice, map, `codeprism get`, or `codeprism read --mode signatures/diff` output.
 - Treat token counts as estimates, not billing-grade measurements.

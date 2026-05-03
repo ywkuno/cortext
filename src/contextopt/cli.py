@@ -13,6 +13,7 @@ from .exporters.dot import export_dot
 from .exporters.json_export import export_json
 from .exporters.markdown import export_markdown
 from .exporters.web import export_web_visualization
+from .gain import compute_gain, format_gain
 from .graph import GraphStore
 from .integrations import (
     default_claude_home,
@@ -75,6 +76,12 @@ def main(argv: list[str] | None = None) -> int:
     p_stats = sub.add_parser("stats", help="Show local token and graph statistics.")
     p_stats.add_argument("root", nargs="?", default=".")
     p_stats.add_argument("--db", default=".contextopt/context.db")
+    p_gain = sub.add_parser("gain", help="Report estimated context savings and map freshness.")
+    p_gain.add_argument("root", nargs="?", default=".")
+    p_gain.add_argument("--db", default=".contextopt/context.db")
+    p_gain.add_argument("--slice", help="Optional slice manifest JSON. Defaults to latest local slice.")
+    p_gain.add_argument("--max-file-bytes", type=int)
+    p_gain.add_argument("--ignore", action="append", default=[])
     p_prime = sub.add_parser(
         "prime",
         help="Map the repo and write a focused slice for the current task.",
@@ -346,8 +353,27 @@ def main(argv: list[str] | None = None) -> int:
         print(format_read_result(result), end="")
         return 0
     if args.cmd == "stats":
-        stats = compute_stats(Path(args.root), GraphStore(Path(args.db)))
+        root = Path(args.root).resolve()
+        config = load_config(root)
+        stats = compute_stats(
+            root,
+            GraphStore(Path(args.db)),
+            max_file_bytes=config.max_file_bytes,
+            ignore_patterns=config.ignore,
+        )
         print(format_stats(stats))
+        return 0
+    if args.cmd == "gain":
+        root = Path(args.root).resolve()
+        config = load_config(root)
+        gain = compute_gain(
+            root,
+            GraphStore(Path(args.db)),
+            slice_path=Path(args.slice) if args.slice else None,
+            max_file_bytes=args.max_file_bytes or config.max_file_bytes,
+            ignore_patterns=[*config.ignore, *args.ignore],
+        )
+        print(format_gain(gain), end="")
         return 0
     if args.cmd == "prime":
         root = Path(args.root).resolve()
