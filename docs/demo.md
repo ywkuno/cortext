@@ -63,7 +63,7 @@ Read progressively instead of opening whole files by default:
 
 ```bash
 codeprism read src/app.py --mode map
-codeprism read src/app.py --mode signatures
+codeprism read src/app.py --mode signatures --refresh
 codeprism read src/app.py --mode diff
 ```
 
@@ -75,6 +75,7 @@ codeprism references function::src/app.py::main
 ```
 
 Use `--mode full` only when the cheaper map, signatures, diff, slice, or exact node output is insufficient. The get command prints only the mapped source span for that node, with line and token estimate metadata.
+Context-consuming commands warn if the map is stale. Use `--refresh` to update incrementally before reading context, or `--strict-fresh` in CI/agent guardrails when stale context should fail.
 
 For durable local handoff notes:
 

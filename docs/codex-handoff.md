@@ -25,7 +25,9 @@ codeprism map .
 codeprism export --format md --out .codeprism/context-pack.md
 codeprism export --format json --out .codeprism/context-pack.json
 codeprism read README.md --mode signatures
+codeprism read README.md --mode signatures --refresh
 codeprism get "heading::README.md::Quick Start"
+codeprism get "heading::README.md::Quick Start" --strict-fresh
 codeprism references "heading::README.md::Quick Start"
 codeprism prime main
 codeprism prime "current task" --changed
@@ -85,6 +87,7 @@ Then inspect generated files under `.codeprism/`.
 - Prime prints source, full-context, slice, estimated saving, included file/symbol/edge counts, and changed-file count when used.
 - `codeprism get <node-id>` prints exact source for mapped file, doc, and symbol nodes, using stable node IDs from slices, query results, or graph JSON.
 - `codeprism read <path> --mode map|signatures|diff|full` lets agents inspect file shape, symbols, or one-file diffs before explicitly reading full files.
+- Context-consuming commands warn when the map is stale. Use `--refresh` to incrementally update first, or `--strict-fresh` to fail instead of reading stale graph state.
 - `codeprism gain` reports estimated saved tokens and warns when files changed after the latest map.
 - `codeprism references <node-id>` reports incoming and outgoing graph references.
 - `codeprism onboard` and `codeprism memory` manage inspectable local project memory under `.codeprism/memory/`.

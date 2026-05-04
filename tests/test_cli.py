@@ -233,6 +233,78 @@ def test_get_command_returns_nonzero_for_missing_node(tmp_path: Path):
     assert "node not found" in result.stderr.lower()
 
 
+def test_get_warns_when_map_is_stale(tmp_path: Path):
+    app = tmp_path / "app.py"
+    app.write_text("def target():\n    return 1\n", encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+    app.write_text("def target():\n    return 2\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "get",
+            "function::app.py::target",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Warning: CodePrism map is stale" in result.stderr
+    assert "1 changed" in result.stderr
+
+
+def test_get_strict_fresh_fails_when_map_is_stale(tmp_path: Path):
+    app = tmp_path / "app.py"
+    app.write_text("def target():\n    return 1\n", encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+    app.write_text("def target():\n    return 2\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "get",
+            "function::app.py::target",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+            "--strict-fresh",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 3
+    assert "Error: CodePrism map is stale" in result.stderr
+    assert "Use --refresh" in result.stderr
+    assert result.stdout == ""
+
+
 def test_read_map_mode_prints_file_metadata_without_source_body(tmp_path: Path):
     (tmp_path / "app.py").write_text(
         "def target():\n"
@@ -280,6 +352,45 @@ def test_read_map_mode_prints_file_metadata_without_source_body(tmp_path: Path):
     assert trace_rows[-1]["event"] == "read_map"
     assert trace_rows[-1]["path"] == "app.py"
     assert trace_rows[-1]["estimated_tokens"] > 0
+
+
+def test_read_refresh_updates_stale_map_before_signatures(tmp_path: Path):
+    app = tmp_path / "app.py"
+    app.write_text("def old_name():\n    return 1\n", encoding="utf-8")
+    db = tmp_path / ".contextopt" / "context.db"
+    map_result = subprocess.run(
+        [sys.executable, "-m", "contextopt.cli", "map", str(tmp_path), "--db", str(db)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert map_result.returncode == 0, map_result.stderr
+    app.write_text("def new_name():\n    return 2\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "read",
+            "app.py",
+            "--mode",
+            "signatures",
+            "--root",
+            str(tmp_path),
+            "--db",
+            str(db),
+            "--refresh",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "new_name" in result.stdout
+    assert "old_name" not in result.stdout
+    assert "CodePrism map is stale" not in result.stderr
 
 
 def test_read_signatures_mode_prints_symbols_without_function_bodies(tmp_path: Path):

@@ -97,6 +97,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - `codeprism read <path> --mode map|signatures|diff|full` supports progressive, token-aware file reading
 - `codeprism references <node-id>` reports incoming and outgoing graph references
 - `codeprism gain` reports estimated saved tokens and stale-map status
+- Context-consuming commands warn on stale maps; `--refresh` incrementally remaps first and `--strict-fresh` fails instead of reading stale graph state
 - `codeprism onboard` and `codeprism memory` create inspectable local project memory
 - `codeprism benchmark` writes reproducible local token-savings reports
 - `codeprism mcp --list-tools` exposes the experimental MCP tool surface; `codeprism mcp` runs the optional SDK-backed server

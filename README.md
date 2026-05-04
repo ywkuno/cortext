@@ -47,6 +47,7 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Shows graph references with `codeprism references <node-id>`.
 - Estimates context size and creates targeted Markdown slices for focused work.
 - Reports estimated saved tokens and stale-map status with `codeprism gain`.
+- Warns when context-reading commands see a stale map, with `--refresh` and `--strict-fresh` for enforced freshness.
 - Writes local project memory with `codeprism onboard` and `codeprism memory`.
 - Produces reproducible savings reports with `codeprism benchmark`.
 - Routes generated artifacts outside a target repo with `--artifact-dir` and `--readonly-root`.
@@ -155,6 +156,8 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
 | `codeprism prime "topic" --artifact-dir <dir> --readonly-root` | Write prime artifacts outside the target repo and refuse root writes. |
 | `codeprism visualize --outdir <dir>` | Generate a static browser viewer and auto-load `.codeprism/live-trace.jsonl` when present. |
+| `--refresh` | Incrementally refresh the map before a context-consuming command. |
+| `--strict-fresh` | Fail when the map is stale instead of warning. |
 | `codeprism get <node-id>` | Print exact source for a mapped file, doc, or symbol node. |
 | `codeprism references <node-id>` | Show incoming and outgoing graph references for a node. |
 | `codeprism read <path> --mode map` | Print mapped nodes for a file without source bodies. |
@@ -197,6 +200,16 @@ codeprism prime "what I am changing" --changed
 ```
 
 The assistant should read the slice first, then verify important details in raw source files before editing.
+
+To keep context consistent as the repo evolves, use freshness-aware reads:
+
+```bash
+codeprism read src/app.py --mode signatures --refresh
+codeprism get function::src/app.py::billing_webhook --strict-fresh
+codeprism visualize --refresh --outdir .codeprism/visual
+```
+
+Context-consuming commands warn when the map is stale. Use `--refresh` to incrementally remap before serving context, or `--strict-fresh` in CI/agent guardrails to fail instead of reading stale graph state.
 
 For a repository that should not receive generated files, use:
 

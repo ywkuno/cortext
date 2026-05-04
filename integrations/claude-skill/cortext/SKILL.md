@@ -46,8 +46,15 @@ codeprism read PATH --mode signatures
 codeprism read PATH --mode diff
 ```
 
-5. Open full raw files only when the slice, exact node source, signatures, and diff are clearly insufficient.
-6. For broader orientation, refresh the map and check the savings/freshness report:
+5. If a context command warns that the map is stale, refresh before trusting the graph:
+
+```bash
+codeprism read PATH --mode signatures --refresh
+codeprism get NODE_ID --strict-fresh
+```
+
+6. Open full raw files only when the slice, exact node source, signatures, and diff are clearly insufficient.
+7. For broader orientation, refresh the map and check the savings/freshness report:
 
 ```bash
 codeprism map .
@@ -55,20 +62,20 @@ codeprism stats
 codeprism gain
 ```
 
-7. Use local project memory when the task needs durable handoff context:
+8. Use local project memory when the task needs durable handoff context:
 
 ```bash
 codeprism onboard --notes "project purpose, build/test commands, and safety notes"
 codeprism memory read project
 ```
 
-8. If CodePrism behavior seems stale, check the installed helpers:
+9. If CodePrism behavior seems stale, check the installed helpers:
 
 ```bash
 codeprism doctor
 ```
 
-9. Use the visual map as a bonus inspection layer, not the first step:
+10. Use the visual map as a bonus inspection layer, not the first step:
 
 ```bash
 codeprism visualize --context .codeprism/slices/<slice>.json
@@ -80,6 +87,7 @@ When `.codeprism/live-trace.jsonl` exists, `codeprism visualize` auto-loads it f
 
 - Prefer deterministic context pack facts over guesses.
 - If the map is stale, refresh it.
+- Prefer `--refresh` for normal stale-map recovery and `--strict-fresh` when stale context should fail the command.
 - Use `codeprism gain` when you need to confirm estimated savings or map freshness.
 - Use `codeprism references` before broad search when a mapped node is central to the task.
 - Do not send private project files to external APIs.

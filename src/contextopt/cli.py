@@ -15,6 +15,7 @@ from .exporters.dot import export_dot
 from .exporters.json_export import export_json
 from .exporters.markdown import export_markdown
 from .exporters.web import export_web_visualization
+from .freshness import compute_freshness
 from .gain import compute_gain, format_gain
 from .graph import GraphStore
 from .integrations import (
@@ -37,6 +38,7 @@ from .stats import compute_stats, format_stats
 
 PUBLIC_CLI = "codeprism"
 LEGACY_CLI = "contextopt"
+STALE_CONTEXT_EXIT = 3
 
 
 def _program_name(argv0: str | None = None) -> str:
@@ -66,22 +68,27 @@ def main(argv: list[str] | None = None) -> int:
     p_export.add_argument("--max-nodes", type=int, default=5000)
     p_export.add_argument("--max-edges", type=int, default=5000)
     p_export.add_argument("--max-chars", type=int)
+    _add_freshness_args(p_export)
     p_query = sub.add_parser("query", help="Query the local project map.")
     p_query.add_argument("text")
     p_query.add_argument("--db")
     p_query.add_argument("--limit", type=int, default=20)
+    _add_freshness_args(p_query)
     p_references = sub.add_parser("references", help="Show graph references for a node ID.")
     p_references.add_argument("node_id")
     p_references.add_argument("--db")
+    _add_freshness_args(p_references)
     p_get = sub.add_parser("get", help="Print exact source for a mapped node ID.")
     p_get.add_argument("node_id")
     p_get.add_argument("--root", default=".")
     p_get.add_argument("--db")
+    _add_freshness_args(p_get)
     p_read = sub.add_parser("read", help="Read a file through token-aware modes.")
     p_read.add_argument("path")
     p_read.add_argument("--mode", choices=["map", "signatures", "diff", "full"], default="map")
     p_read.add_argument("--root", default=".")
     p_read.add_argument("--db")
+    _add_freshness_args(p_read)
     p_stats = sub.add_parser("stats", help="Show local token and graph statistics.")
     p_stats.add_argument("root", nargs="?", default=".")
     p_stats.add_argument("--db")
@@ -152,6 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     p_slice.add_argument("--out")
     p_slice.add_argument("--limit", type=int, default=12)
     p_slice.add_argument("--path", action="append", default=[], help="Seed the slice with a file path.")
+    _add_freshness_args(p_slice)
     p_visualize = sub.add_parser(
         "visualize",
         help="Generate an interactive browser view of the project map.",
@@ -160,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     p_visualize.add_argument("--outdir")
     p_visualize.add_argument("--activity")
     p_visualize.add_argument("--context")
+    _add_freshness_args(p_visualize)
     p_setup = sub.add_parser(
         "setup",
         help="Install CodePrism agent integrations and verify them with doctor.",
@@ -266,7 +275,14 @@ def main(argv: list[str] | None = None) -> int:
         root = Path.cwd().resolve()
         out = Path(args.out) if args.out else artifact_path(root, default_out)
         out.parent.mkdir(parents=True, exist_ok=True)
-        store = GraphStore(_db_path(root, args.db))
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
         if args.format == "dot":
             export_dot(store, out, max_edges=args.max_edges)
         elif args.format == "json":
@@ -296,8 +312,16 @@ def main(argv: list[str] | None = None) -> int:
             if trace_candidate.exists():
                 activity_path = trace_candidate
         context_path = Path(args.context) if args.context else None
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
         html_path = export_web_visualization(
-            GraphStore(_db_path(root, args.db)),
+            store,
             outdir,
             activity_path=activity_path,
             context_path=context_path,
@@ -397,15 +421,31 @@ def main(argv: list[str] | None = None) -> int:
             return 0
     if args.cmd == "query":
         root = Path.cwd().resolve()
-        rows = list(query_graph(GraphStore(_db_path(root, args.db)), args.text, args.limit))
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
+        rows = list(query_graph(store, args.text, args.limit))
         for row in rows:
             print(f"{row['kind']:10} {row['path']} {row['name']}")
         _trace_event(root, event="query", meta={"text": args.text, "results": len(rows)})
         return 0
     if args.cmd == "references":
         root = Path.cwd().resolve()
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
         try:
-            result = find_references(GraphStore(_db_path(root, args.db)), args.node_id)
+            result = find_references(store, args.node_id)
         except ReferencesError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
@@ -414,9 +454,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "get":
         root = Path(args.root).resolve()
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
         try:
             result = retrieve_source(
-                GraphStore(_db_path(root, args.db)),
+                store,
                 root,
                 args.node_id,
             )
@@ -430,10 +478,17 @@ def main(argv: list[str] | None = None) -> int:
         root = Path(args.root).resolve()
         try:
             store = (
-                GraphStore(_db_path(root, args.db))
+                _fresh_context_store(
+                    root,
+                    args.db,
+                    refresh=args.refresh,
+                    strict_fresh=args.strict_fresh,
+                )
                 if args.mode in {"map", "signatures"}
                 else None
             )
+            if store is None and args.mode in {"map", "signatures"}:
+                return STALE_CONTEXT_EXIT
             result = read_path(
                 root=root,
                 path=args.path,
@@ -644,8 +699,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "slice":
         out = Path(args.out) if args.out else default_slice_path(args.query)
+        root = Path.cwd().resolve()
+        store = _fresh_context_store(
+            root,
+            args.db,
+            refresh=args.refresh,
+            strict_fresh=args.strict_fresh,
+        )
+        if store is None:
+            return STALE_CONTEXT_EXIT
         result = export_slice(
-            GraphStore(_db_path(Path.cwd(), args.db)),
+            store,
             args.query,
             out,
             limit=args.limit,
@@ -658,7 +722,6 @@ def main(argv: list[str] | None = None) -> int:
             f"{result['estimated_token_ratio']:.2%} of full context). "
             f"Manifest: {result['manifest']}"
         )
-        root = Path.cwd().resolve()
         _trace_event(
             root,
             event="slice",
@@ -701,6 +764,76 @@ def _print_doctor_report(report: dict[str, object]) -> None:
         )
     if not report["ok"]:
         print("Run `codeprism setup --target all` to refresh helpers.")
+
+
+def _add_freshness_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Incrementally refresh the project map before reading context.",
+    )
+    parser.add_argument(
+        "--strict-fresh",
+        action="store_true",
+        help="Fail if the project map is stale instead of warning.",
+    )
+
+
+def _fresh_context_store(
+    root: Path,
+    explicit_db: str | None,
+    *,
+    refresh: bool = False,
+    strict_fresh: bool = False,
+) -> GraphStore | None:
+    config = load_config(root)
+    db = _db_path(root, explicit_db, write=refresh)
+    store = GraphStore(db)
+    if refresh:
+        map_project(
+            root,
+            store,
+            max_file_bytes=config.max_file_bytes,
+            ignore_patterns=config.ignore,
+        )
+        return store
+    freshness = compute_freshness(
+        root,
+        store,
+        max_file_bytes=config.max_file_bytes,
+        ignore_patterns=config.ignore,
+    )
+    if freshness["status"] == "current":
+        return store
+    message = _freshness_message(freshness)
+    if strict_fresh:
+        print(
+            f"Error: CodePrism map is stale ({message}). Use --refresh or run `codeprism map .`.",
+            file=sys.stderr,
+        )
+        return None
+    print(
+        f"Warning: CodePrism map is stale ({message}). Use --refresh or run `codeprism map .`.",
+        file=sys.stderr,
+    )
+    return store
+
+
+def _freshness_message(freshness: dict[str, object]) -> str:
+    def count(name: str) -> int:
+        value = freshness.get(name)
+        return len(value) if isinstance(value, list) else 0
+
+    parts = [
+        f"{count('changed_files')} changed",
+        f"{count('new_files')} new",
+        f"{count('deleted_files')} deleted",
+    ]
+    if freshness.get("root_mismatch"):
+        parts.append("root mismatch")
+    if freshness.get("latest_run_created_at") is None:
+        parts.append("no completed map")
+    return ", ".join(parts)
 
 
 def _resolve_optional_path(value: str | None) -> Path | None:
