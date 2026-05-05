@@ -1,0 +1,5 @@
+{
+  "name": "Medium Python Service",
+  "description": "Python service with billing flow code plus generated catalog noise.",
+  "query": "invoice total"
+}

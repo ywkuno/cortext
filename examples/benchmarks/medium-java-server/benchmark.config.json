@@ -1,0 +1,5 @@
+{
+  "name": "Medium Java Server",
+  "description": "Java boot path fixture with unrelated generated opcode names.",
+  "query": "world startup"
+}

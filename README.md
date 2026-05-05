@@ -109,14 +109,7 @@ codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.
 
 This writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`, a Markdown summary table suitable for release notes or README updates.
 
-Current checked-in fixture suite:
-
-| Fixture | Files | Source tokens | Slice tokens | Estimated reduction |
-| --- | ---: | ---: | ---: | ---: |
-| Basic Java | 5 | 1,126 | 524 | 53.46% |
-| Basic Kotlin | 4 | 1,139 | 442 | 61.19% |
-| Basic Python | 5 | 1,263 | 172 | 86.38% |
-| Basic TypeScript | 5 | 1,073 | 264 | 75.40% |
+Current checked-in fixture suite: 8 Python, TypeScript, Java, and Kotlin fixtures with a 68.75% average estimated source-to-slice reduction. See [docs/benchmarks.md](docs/benchmarks.md) for the full reproducible table and caveats.
 
 ## Install From Source
 
@@ -330,6 +323,7 @@ codeprism export --format json --out .codeprism/context-pack.json
 codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
 codeprism gain
+codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .codeprism/visual
 codeprism slice main --out .codeprism/slices/main.md
 codeprism visualize --context .codeprism/slices/main.json --outdir .codeprism/visual
