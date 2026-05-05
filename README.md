@@ -113,7 +113,7 @@ Current checked-in fixture suite:
 
 | Fixture | Files | Source tokens | Slice tokens | Estimated reduction |
 | --- | ---: | ---: | ---: | ---: |
-| Basic Java | 5 | 1,126 | 472 | 58.08% |
+| Basic Java | 5 | 1,126 | 524 | 53.46% |
 | Basic Kotlin | 4 | 1,139 | 442 | 61.19% |
 | Basic Python | 5 | 1,263 | 172 | 86.38% |
 | Basic TypeScript | 5 | 1,073 | 264 | 75.40% |

@@ -96,6 +96,7 @@ def run_benchmark_suite(
         slug = _slug(fixture["name"])
         fixture_out = out.parent / f"{slug}.json"
         fixture_db = out.parent / f"{slug}.db"
+        _reset_benchmark_db(fixture_db)
         result = run_benchmark(
             fixture["root"],
             GraphStore(fixture_db),
@@ -232,3 +233,9 @@ def _suite_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "min_source_to_slice_saved_percent": min(savings),
         "max_source_to_slice_saved_percent": max(savings),
     }
+
+
+def _reset_benchmark_db(db: Path) -> None:
+    for path in [db, db.with_name(f"{db.name}-wal"), db.with_name(f"{db.name}-shm")]:
+        if path.exists():
+            path.unlink()
