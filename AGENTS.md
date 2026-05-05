@@ -33,6 +33,7 @@ codeprism benchmark examples/benchmarks/basic-python --query report --out .codep
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
 codeprism benchmark-compare .codeprism/benchmarks/suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
 python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg
+python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg --check
 python scripts/benchmark_trend.py --baseline-suite .codeprism/benchmarks/suite.json
 python scripts/pre_release_proof.py --baseline-suite .codeprism/benchmarks/suite.json
 codeprism audit-session examples/codex-session.sample.jsonl

@@ -34,6 +34,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--regression-threshold", type=float, default=5.0)
     parser.add_argument("--fail-on-regression", action="store_true")
     parser.add_argument("--skip-tests", action="store_true")
+    parser.add_argument("--chart-out", default="docs/assets/benchmark-snapshot.svg")
+    parser.add_argument("--skip-chart-check", action="store_true")
     parser.add_argument("--scan-target", action="append", default=[])
     parser.add_argument("--hygiene-pattern", action="append", default=[])
     parser.add_argument(
@@ -64,6 +66,38 @@ def main(argv: list[str] | None = None) -> int:
             "benchmark-suite",
         )
     )
+    chart_arg_path = Path(args.chart_out)
+    chart_path = chart_arg_path if chart_arg_path.is_absolute() else root / chart_arg_path
+    chart_artifact = outdir / "benchmark-chart.svg"
+    chart_script = Path(__file__).with_name("render_benchmark_chart.py")
+    results.append(
+        _run_logged(
+            [
+                sys.executable,
+                str(chart_script),
+                str(current_suite),
+                "--out",
+                str(chart_artifact),
+            ],
+            benchmark_dir / "benchmark-chart.log",
+            "benchmark-chart",
+        )
+    )
+    if not args.skip_chart_check:
+        results.append(
+            _run_logged(
+                [
+                    sys.executable,
+                    str(chart_script),
+                    str(current_suite),
+                    "--out",
+                    str(chart_path),
+                    "--check",
+                ],
+                benchmark_dir / "benchmark-chart-check.log",
+                "benchmark-chart-check",
+            )
+        )
 
     baseline_suite = Path(args.baseline_suite) if args.baseline_suite else current_suite
     trend_dir = outdir / "benchmark-trends"
@@ -141,6 +175,8 @@ def main(argv: list[str] | None = None) -> int:
         baseline_suite=baseline_suite,
         current_suite=current_suite,
         trend_report=trend_dir / "comparison.md",
+        chart_artifact=chart_artifact,
+        chart_check=chart_arg_path if not args.skip_chart_check else None,
         audit_report=audit_path,
         hygiene_report=hygiene_path,
         self_baseline=args.baseline_suite is None,
@@ -289,6 +325,8 @@ def _write_summary(
     baseline_suite: Path,
     current_suite: Path,
     trend_report: Path,
+    chart_artifact: Path,
+    chart_check: Path | None,
     audit_report: Path,
     hygiene_report: Path,
     self_baseline: bool,
@@ -315,10 +353,13 @@ def _write_summary(
             f"- Baseline suite: `{baseline_suite}`",
             f"- Current suite: `{current_suite}`",
             f"- Benchmark trend: `{trend_report}`",
+            f"- Benchmark chart: `{chart_artifact}`",
             f"- Session audit: `{audit_report}`",
             f"- Public hygiene scan: `{hygiene_report}`",
         ]
     )
+    if chart_check is not None:
+        lines.append(f"- Checked-in chart: `{chart_check}`")
     if self_baseline:
         lines.extend(
             [

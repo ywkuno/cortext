@@ -16,6 +16,12 @@ python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out 
 
 The benchmark command writes per-fixture JSON reports, a combined `suite.json`, and a Markdown summary at `.codeprism/benchmarks/suite.md`. The chart renderer turns the suite JSON into `docs/assets/benchmark-snapshot.svg` for README and docs display.
 
+To verify the checked-in chart is current without rewriting it:
+
+```bash
+python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg --check
+```
+
 Compare two suite runs:
 
 ```bash

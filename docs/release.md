@@ -72,6 +72,7 @@ When fixture numbers change, regenerate both the Markdown table and SVG chart:
 ```bash
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
 python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg
+python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg --check
 ```
 
 ## Public Hygiene

@@ -43,6 +43,8 @@ jobs:
           codeprism gain
           codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
           codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+          python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg --check
+          python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/benchmark-snapshot.svg
           codeprism benchmark-compare .codeprism/benchmarks/suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
           codeprism onboard --notes "CI smoke onboarding memory."
           codeprism memory list
@@ -58,4 +60,5 @@ jobs:
           path: |
             .codeprism/benchmarks/*.json
             .codeprism/benchmarks/*.md
+            .codeprism/benchmarks/*.svg
           if-no-files-found: ignore
