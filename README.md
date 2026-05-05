@@ -1,6 +1,6 @@
 # CodePrism
 
-[![Tests](https://github.com/ywkuno/codeprism/actions/workflows/tests.yml/badge.svg)](https://github.com/ywkuno/codeprism/actions/workflows/tests.yml)
+[![Tests](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml/badge.svg)](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Local-first context saving for AI coding agents.
@@ -43,6 +43,7 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Reuses file hashes so unchanged files are not rescanned.
 - Runs `codeprism prime "<task>"` to map the repo and write a targeted slice in one step.
 - Caps generated slice Markdown to about 8K estimated tokens by default so the slice itself does not swamp the agent context window.
+- Writes a tiny `.brief.md` beside each slice so agents can resume after compaction without reloading the full slice.
 - Fetches exact mapped source with `codeprism get <node-id>` so agents can inspect one symbol or file before opening broader code.
 - Reads files through token-aware modes with `codeprism read <path> --mode map|signatures|diff|full`.
 - Shows graph references with `codeprism references <node-id>`.
@@ -102,7 +103,7 @@ codeprism prime "main"
 codeprism visualize --context .codeprism/slices/main.json --outdir .codeprism/visual
 ```
 
-Read the generated `.codeprism/slices/main.md` before opening broad raw file trees. `codeprism prime` also appends a safe local event to `.codeprism/live-trace.jsonl`; `codeprism visualize` auto-loads that trace when no explicit `--activity` file is supplied. Open `.codeprism/visual/index.html` in a browser when you want the optional graph view.
+Read the generated `.codeprism/slices/main.brief.md` before opening broad raw file trees. Open `.codeprism/slices/main.md` only when the brief is insufficient. `codeprism prime` also appends a safe local event to `.codeprism/live-trace.jsonl`; `codeprism visualize` auto-loads that trace when no explicit `--activity` file is supplied. Open `.codeprism/visual/index.html` in a browser when you want the optional graph view.
 See [docs/demo.md](docs/demo.md) for the full activity replay and context-overlay walkthrough.
 
 For read-only checkouts or CI jobs, route generated artifacts outside the repository:
@@ -158,7 +159,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism export --format md` | Export a Markdown context pack. |
 | `codeprism export --format json` | Export stable graph JSON. |
 | `codeprism export --format dot` | Export DOT graph data. |
-| `codeprism prime "topic"` | Map the repo, write a focused slice, and print a savings report. |
+| `codeprism prime "topic"` | Map the repo, write a focused slice plus a small slice brief, and print a savings report. |
 | `codeprism prime "topic" --changed` | Seed the slice with changed, staged, and untracked Git files. |
 | `codeprism prime "topic" --artifact-dir <dir> --readonly-root` | Write prime artifacts outside the target repo and refuse root writes. |
 | `codeprism prime "topic" --max-tokens 6000` | Tighten the generated slice budget for short task loops. |
@@ -202,7 +203,7 @@ codeprism visualize --context .codeprism/slices/billing-webhook.json --outdir .c
 
 That gives an assistant a smaller, inspectable starting point. The prime command maps the repo, writes Markdown for the assistant, writes a JSON manifest for the viewer, and prints source/full-context/slice token estimates plus estimated savings. The gain command repeats the savings report and warns if files changed after the last map. The read command lets an agent inspect file shape before bodies, and the get command uses stable node IDs from slices, query results, or graph JSON to return only the requested source span.
 
-Generated slices are capped to about 8K estimated tokens by default, with a safe ceiling of 16K unless `--allow-large-context` is supplied. If a slice says it was capped, keep the next step narrow: use `codeprism query`, `codeprism get`, `codeprism references`, or `codeprism read --mode signatures/diff` instead of raising the budget reflexively.
+Generated slices are capped to about 8K estimated tokens by default, with a safe ceiling of 16K unless `--allow-large-context` is supplied. Each slice also gets a compact `.brief.md` file for resumes and compacted conversations. If a slice says it was capped, keep the next step narrow: use `codeprism query`, `codeprism get`, `codeprism references`, or `codeprism read --mode signatures/diff` instead of raising the budget reflexively. Do not rerun a broad prime only because the conversation compacted; read the existing brief and continue from its node IDs and paths.
 
 During active edits, seed the slice from Git changes:
 
