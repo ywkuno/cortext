@@ -1,0 +1,5 @@
+{
+  "name": "Basic Kotlin",
+  "description": "Small Android-style Kotlin state and generated copy fixture.",
+  "query": "settings locale"
+}

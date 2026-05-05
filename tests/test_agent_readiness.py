@@ -159,6 +159,63 @@ def test_benchmark_command_writes_reproducible_savings_report(tmp_path: Path) ->
     assert "Wrote benchmark" in result.stdout
 
 
+def test_benchmark_suite_writes_json_and_markdown_summary(tmp_path: Path) -> None:
+    fixtures = tmp_path / "fixtures"
+    first = fixtures / "python"
+    second = fixtures / "typescript"
+    first.mkdir(parents=True)
+    second.mkdir(parents=True)
+    (first / "benchmark.config.json").write_text(
+        json.dumps({"name": "Python Fixture", "query": "main"}),
+        encoding="utf-8",
+    )
+    (first / "app.py").write_text(
+        "def main():\n"
+        f"    notes = {['python body'] * 120!r}\n"
+        "    return len(notes)\n",
+        encoding="utf-8",
+    )
+    (second / "benchmark.config.json").write_text(
+        json.dumps({"name": "TypeScript Fixture", "query": "handler"}),
+        encoding="utf-8",
+    )
+    (second / "handler.ts").write_text(
+        "export function handler() {\n"
+        f"  const notes = {['typescript body'] * 120!r};\n"
+        "  return notes.length;\n"
+        "}\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "suite.json"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "benchmark-suite",
+            str(fixtures),
+            "--out",
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert payload["fixture_count"] == 2
+    assert payload["summary"]["average_source_to_slice_saved_percent"] > 0
+    assert {fixture["name"] for fixture in payload["fixtures"]} == {
+        "Python Fixture",
+        "TypeScript Fixture",
+    }
+    assert "| Python Fixture |" in markdown
+    assert "Markdown summary" in result.stdout
+
+
 def test_mcp_tool_specs_expose_core_context_tools() -> None:
     tool_names = {tool["name"] for tool in mcp_tool_specs()}
 

@@ -40,6 +40,7 @@ codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .c
 codeprism stats
 codeprism gain
 codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
+codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
 codeprism onboard --notes "Project purpose, build commands, and safety notes."
 codeprism memory read project
 codeprism mcp --list-tools
@@ -100,6 +101,7 @@ Then inspect generated files under `.codeprism/`.
 - `codeprism references <node-id>` reports incoming and outgoing graph references.
 - `codeprism onboard` and `codeprism memory` manage inspectable local project memory under `.codeprism/memory/`.
 - `codeprism benchmark` writes reproducible JSON savings reports.
+- `codeprism benchmark-suite` writes a cross-fixture JSON report plus Markdown summary table.
 - `codeprism mcp --list-tools` shows the experimental MCP tool surface; `codeprism mcp` needs the optional `.[mcp]` extra.
 - `codeprism slice ...` writes Markdown, a compact `.brief.md`, and a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .codeprism/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.

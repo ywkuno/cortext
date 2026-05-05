@@ -1,0 +1,5 @@
+{
+  "name": "Basic TypeScript",
+  "description": "Tiny TypeScript API surface with route and model noise.",
+  "query": "travel route"
+}

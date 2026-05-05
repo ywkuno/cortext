@@ -1,0 +1,5 @@
+{
+  "name": "Basic Python",
+  "description": "Small Python service with report helpers and noisy legacy data.",
+  "query": "report"
+}

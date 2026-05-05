@@ -10,7 +10,15 @@ from pathlib import Path
 from .activity import write_activity_payload
 from .activity_adapters import adapt_tool_jsonl
 from .artifacts import ARTIFACT_DIR, artifact_path, config_path, resolve_artifact_path
-from .benchmark import default_benchmark_path, format_benchmark, run_benchmark
+from .benchmark import (
+    BenchmarkError,
+    default_benchmark_path,
+    default_benchmark_suite_path,
+    format_benchmark,
+    format_benchmark_suite,
+    run_benchmark,
+    run_benchmark_suite,
+)
 from .config import load_config
 from .exporters.dot import export_dot
 from .exporters.json_export import export_json
@@ -128,6 +136,14 @@ def main(argv: list[str] | None = None) -> int:
     p_benchmark.add_argument("--max-file-bytes", type=int)
     p_benchmark.add_argument("--ignore", action="append", default=[])
     _add_lock_args(p_benchmark)
+    p_benchmark_suite = sub.add_parser(
+        "benchmark-suite",
+        help="Run all local benchmark fixtures and write a summary table.",
+    )
+    p_benchmark_suite.add_argument("fixtures_root", nargs="?", default="examples/benchmarks")
+    p_benchmark_suite.add_argument("--out")
+    p_benchmark_suite.add_argument("--max-file-bytes", type=int, default=500_000)
+    p_benchmark_suite.add_argument("--ignore", action="append", default=[])
     p_audit_session = sub.add_parser(
         "audit-session",
         help="Audit a local Codex JSONL session for CodePrism usage and context risk.",
@@ -720,6 +736,33 @@ def main(argv: list[str] | None = None) -> int:
             event="benchmark",
             path=_relative_trace_path(out, root),
             meta={"query": args.query, "out": str(out)},
+        )
+        return 0
+    if args.cmd == "benchmark-suite":
+        fixtures_root = Path(args.fixtures_root).resolve()
+        out = Path(args.out) if args.out else default_benchmark_suite_path(Path.cwd())
+        try:
+            result = run_benchmark_suite(
+                fixtures_root,
+                out=out,
+                max_file_bytes=args.max_file_bytes,
+                ignore_patterns=args.ignore,
+            )
+        except BenchmarkError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        print(format_benchmark_suite(result, out), end="")
+        _trace_event(
+            Path.cwd(),
+            event="benchmark_suite",
+            path=_relative_trace_path(out, Path.cwd()),
+            meta={
+                "fixtures_root": str(fixtures_root),
+                "fixture_count": result["fixture_count"],
+                "average_source_to_slice_saved_percent": result["summary"][
+                    "average_source_to_slice_saved_percent"
+                ],
+            },
         )
         return 0
     if args.cmd == "audit-session":

@@ -1,0 +1,5 @@
+{
+  "name": "Basic Java",
+  "description": "Small Java boot path with a generated constants file.",
+  "query": "server boot"
+}

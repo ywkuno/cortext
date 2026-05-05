@@ -1,5 +1,7 @@
 # CodePrism
 
+![CodePrism banner](docs/assets/codeprism-banner.svg)
+
 [![Tests](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml/badge.svg)](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -11,7 +13,7 @@ The goal is simple: **map first, slice next, read raw files only when they matte
 
 ![CodePrism brain map](docs/assets/cortext-brain-map.png)
 
-## Three Commands
+## Quick Commands
 
 ```bash
 pip install -e ".[dev]"
@@ -53,7 +55,7 @@ Agents waste context when they brute-read file trees, repeated shell output, gen
 - Serializes map refreshes with an inspectable `context.lock` file so concurrent agents do not rewrite the graph at the same time.
 - Provides `codeprism watch` for lightweight polling refresh loops during active multi-agent work.
 - Writes local project memory with `codeprism onboard` and `codeprism memory`.
-- Produces reproducible savings reports with `codeprism benchmark`.
+- Produces reproducible savings reports with `codeprism benchmark` and `codeprism benchmark-suite`.
 - Routes generated artifacts outside a target repo with `--artifact-dir` and `--readonly-root`.
 - Exports Markdown, JSON, DOT, and static browser visualizations.
 - Generates stable graph data for tool integration and optional visual inspection.
@@ -98,6 +100,23 @@ codeprism audit-session SESSION_ID_OR_JSONL --out .codeprism/session-audit.md
 ```
 
 The audit reports CodePrism command timing, raw reads, search commands, compaction mentions, large outputs, and savings observed in the session. It is local-only and reads a session log only when you explicitly pass one.
+
+To reproduce the public fixture table locally:
+
+```bash
+codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+```
+
+This writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`, a Markdown summary table suitable for release notes or README updates.
+
+Current checked-in fixture suite:
+
+| Fixture | Files | Source tokens | Slice tokens | Estimated reduction |
+| --- | ---: | ---: | ---: | ---: |
+| Basic Java | 5 | 1,126 | 472 | 58.08% |
+| Basic Kotlin | 4 | 1,139 | 442 | 61.19% |
+| Basic Python | 5 | 1,263 | 172 | 86.38% |
+| Basic TypeScript | 5 | 1,073 | 264 | 75.40% |
 
 ## Install From Source
 
@@ -202,6 +221,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism gain` | Report estimated token savings and map freshness. |
 | `codeprism slice <target>` | Export focused Markdown plus a JSON context overlay manifest. |
 | `codeprism benchmark <root>` | Write a reproducible local token-savings report. |
+| `codeprism benchmark-suite <fixtures>` | Run all local benchmark fixtures and write JSON plus a Markdown table. |
 | `codeprism audit-session <session>` | Audit a local Codex JSONL session for CodePrism adoption and context risk. |
 | `codeprism onboard` | Write local project memory under `.codeprism/memory/`. |
 | `codeprism memory list/read/write` | Manage inspectable local memory files. |

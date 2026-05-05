@@ -1,0 +1,18 @@
+<svg width="1280" height="360" viewBox="0 0 1280 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="360" rx="28" fill="#070B14"/>
+  <path d="M0 72H1280M0 144H1280M0 216H1280M0 288H1280M160 0V360M320 0V360M480 0V360M640 0V360M800 0V360M960 0V360M1120 0V360" stroke="#172238" stroke-width="1"/>
+  <path d="M194 242L362 122L548 206L742 92L922 192L1088 116" stroke="#35D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M362 122L548 206L742 92L922 192" stroke="#60A5FA" stroke-width="2" stroke-dasharray="8 12"/>
+  <circle cx="194" cy="242" r="18" fill="#35D399"/>
+  <circle cx="362" cy="122" r="18" fill="#60A5FA"/>
+  <circle cx="548" cy="206" r="18" fill="#35D399"/>
+  <circle cx="742" cy="92" r="18" fill="#60A5FA"/>
+  <circle cx="922" cy="192" r="18" fill="#35D399"/>
+  <circle cx="1088" cy="116" r="18" fill="#60A5FA"/>
+  <rect x="70" y="66" width="82" height="82" rx="18" fill="#0E1728" stroke="#274266" stroke-width="2"/>
+  <path d="M111 84L139 104L111 126L83 104L111 84Z" stroke="#35D399" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M111 126V150" stroke="#60A5FA" stroke-width="5" stroke-linecap="round"/>
+  <text x="70" y="222" fill="#EAF2FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="64" font-weight="800">CodePrism</text>
+  <text x="72" y="274" fill="#A8B6CC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="27" font-weight="500">Local-first context maps and token-saving slices for AI coding agents</text>
+  <text x="72" y="316" fill="#35D399" font-family="Consolas, JetBrains Mono, monospace" font-size="23" font-weight="600">map first / slice next / read less</text>
+</svg>

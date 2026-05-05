@@ -30,6 +30,8 @@ codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .c
 codeprism stats
 codeprism gain
 codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
+codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+codeprism audit-session examples/codex-session.sample.jsonl
 codeprism mcp --list-tools
 codeprism setup --target project
 codeprism doctor
