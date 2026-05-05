@@ -10,6 +10,14 @@ codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.
 
 The command writes per-fixture JSON reports, a combined `suite.json`, and a Markdown summary at `.codeprism/benchmarks/suite.md`.
 
+Compare two suite runs:
+
+```bash
+codeprism benchmark-compare previous-suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
+```
+
+Add `--fail-on-regression --regression-threshold 5` when you want CI or a release script to fail if any matched fixture loses more than five percentage points of estimated source-to-slice savings.
+
 ## Current Fixture Suite
 
 | Fixture | Files | Source tokens | Slice tokens | Source -> slice | Source -> context pack |
@@ -41,3 +49,7 @@ The real product loop is larger than this table: run `codeprism prime "<task>"`,
 The `basic-*` fixtures are tiny language smoke tests. They keep Python, TypeScript, Java, and Kotlin extraction behavior visible.
 
 The `medium-*` fixtures add a small amount of generated or noisy code around a focused task. They are still CI-sized, but they are closer to the cases CodePrism is meant to handle: identify the relevant slice and avoid dragging every nearby file into the agent prompt.
+
+## CI Artifacts
+
+The GitHub Actions smoke job uploads benchmark JSON and Markdown reports for each Python version as `codeprism-benchmarks-py<version>`. Download two artifacts and run `codeprism benchmark-compare` when reviewing a performance-sensitive change or preparing release notes.

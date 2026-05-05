@@ -43,9 +43,19 @@ jobs:
           codeprism gain
           codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
           codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+          codeprism benchmark-compare .codeprism/benchmarks/suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
           codeprism onboard --notes "CI smoke onboarding memory."
           codeprism memory list
           codeprism mcp --list-tools
           codeprism visualize --context .codeprism/slices/main.json --outdir .codeprism/visual
           codeprism setup --target project
           codeprism doctor --target project
+      - name: Upload benchmark reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeprism-benchmarks-py${{ matrix.python-version }}
+          path: |
+            .codeprism/benchmarks/*.json
+            .codeprism/benchmarks/*.md
+          if-no-files-found: ignore

@@ -105,9 +105,10 @@ To reproduce the public fixture table locally:
 
 ```bash
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+codeprism benchmark-compare previous-suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
 ```
 
-This writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`, a Markdown summary table suitable for release notes or README updates.
+The suite command writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`, a Markdown summary table suitable for release notes or README updates. The compare command writes a Markdown delta report between two suite JSON files.
 
 Current checked-in fixture suite: 8 Python, TypeScript, Java, and Kotlin fixtures with a 68.75% average estimated source-to-slice reduction. See [docs/benchmarks.md](docs/benchmarks.md) for the full reproducible table and caveats.
 
@@ -215,6 +216,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism slice <target>` | Export focused Markdown plus a JSON context overlay manifest. |
 | `codeprism benchmark <root>` | Write a reproducible local token-savings report. |
 | `codeprism benchmark-suite <fixtures>` | Run all local benchmark fixtures and write JSON plus a Markdown table. |
+| `codeprism benchmark-compare <old> <new>` | Compare two benchmark-suite JSON reports and flag savings regressions. |
 | `codeprism audit-session <session>` | Audit a local Codex JSONL session for CodePrism adoption and context risk. |
 | `codeprism onboard` | Write local project memory under `.codeprism/memory/`. |
 | `codeprism memory list/read/write` | Manage inspectable local memory files. |
@@ -324,6 +326,7 @@ codeprism read README.md --mode signatures
 codeprism get "heading::README.md::Quick Start"
 codeprism gain
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+codeprism benchmark-compare .codeprism/benchmarks/suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
 codeprism visualize --activity examples/activity-stream.sample.jsonl --outdir .codeprism/visual
 codeprism slice main --out .codeprism/slices/main.md
 codeprism visualize --context .codeprism/slices/main.json --outdir .codeprism/visual

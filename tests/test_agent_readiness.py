@@ -216,6 +216,84 @@ def test_benchmark_suite_writes_json_and_markdown_summary(tmp_path: Path) -> Non
     assert "Markdown summary" in result.stdout
 
 
+def test_benchmark_compare_reports_regressions_and_can_fail(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    out = tmp_path / "comparison.md"
+    baseline.write_text(
+        json.dumps(
+            {
+                "summary": {"average_source_to_slice_saved_percent": 70.0},
+                "fixtures": [
+                    {
+                        "name": "Python Fixture",
+                        "source_estimated_tokens": 1000,
+                        "slice_estimated_tokens": 300,
+                        "source_to_slice_saved_percent": 70.0,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    current.write_text(
+        json.dumps(
+            {
+                "summary": {"average_source_to_slice_saved_percent": 60.0},
+                "fixtures": [
+                    {
+                        "name": "Python Fixture",
+                        "source_estimated_tokens": 1000,
+                        "slice_estimated_tokens": 400,
+                        "source_to_slice_saved_percent": 60.0,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "benchmark-compare",
+            str(baseline),
+            str(current),
+            "--out",
+            str(out),
+            "--regression-threshold",
+            "5",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    failed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "benchmark-compare",
+            str(baseline),
+            str(current),
+            "--fail-on-regression",
+            "--regression-threshold",
+            "5",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Wrote benchmark comparison" in result.stdout
+    assert "Python Fixture" in out.read_text(encoding="utf-8")
+    assert failed.returncode == 5
+    assert "Benchmark regression detected" in failed.stderr
+
+
 def test_mcp_tool_specs_expose_core_context_tools() -> None:
     tool_names = {tool["name"] for tool in mcp_tool_specs()}
 

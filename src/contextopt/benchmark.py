@@ -29,6 +29,72 @@ def default_benchmark_suite_path(root: Path) -> Path:
     return artifact_path(root, "benchmarks", "suite.json")
 
 
+def compare_benchmark_suites(
+    baseline_path: Path,
+    current_path: Path,
+    *,
+    regression_threshold_percent: float = 5.0,
+) -> dict[str, Any]:
+    if regression_threshold_percent < 0:
+        raise BenchmarkError("Regression threshold must be zero or greater")
+
+    baseline = _read_suite_payload(baseline_path)
+    current = _read_suite_payload(current_path)
+    baseline_fixtures = _fixtures_by_name(baseline)
+    current_fixtures = _fixtures_by_name(current)
+    common_names = sorted(set(baseline_fixtures) & set(current_fixtures))
+    missing = sorted(set(baseline_fixtures) - set(current_fixtures))
+    added = sorted(set(current_fixtures) - set(baseline_fixtures))
+
+    fixture_rows = []
+    regressions = []
+    improvements = []
+    for name in common_names:
+        before = baseline_fixtures[name]
+        after = current_fixtures[name]
+        baseline_saved = float(before.get("source_to_slice_saved_percent") or 0.0)
+        current_saved = float(after.get("source_to_slice_saved_percent") or 0.0)
+        delta = current_saved - baseline_saved
+        row = {
+            "name": name,
+            "baseline_source_to_slice_saved_percent": baseline_saved,
+            "current_source_to_slice_saved_percent": current_saved,
+            "delta_source_to_slice_saved_percent": delta,
+            "baseline_source_estimated_tokens": int(before.get("source_estimated_tokens") or 0),
+            "current_source_estimated_tokens": int(after.get("source_estimated_tokens") or 0),
+            "baseline_slice_estimated_tokens": int(before.get("slice_estimated_tokens") or 0),
+            "current_slice_estimated_tokens": int(after.get("slice_estimated_tokens") or 0),
+        }
+        fixture_rows.append(row)
+        if delta < -regression_threshold_percent:
+            regressions.append(row)
+        elif delta > regression_threshold_percent:
+            improvements.append(row)
+
+    baseline_average = float(
+        baseline.get("summary", {}).get("average_source_to_slice_saved_percent") or 0.0
+    )
+    current_average = float(
+        current.get("summary", {}).get("average_source_to_slice_saved_percent") or 0.0
+    )
+    return {
+        "schema_version": 1,
+        "baseline": str(baseline_path),
+        "current": str(current_path),
+        "regression_threshold_percent": regression_threshold_percent,
+        "baseline_average_source_to_slice_saved_percent": baseline_average,
+        "current_average_source_to_slice_saved_percent": current_average,
+        "average_delta_source_to_slice_saved_percent": current_average - baseline_average,
+        "fixture_count": len(fixture_rows),
+        "added_fixtures": added,
+        "missing_fixtures": missing,
+        "fixtures": fixture_rows,
+        "regressions": regressions,
+        "improvements": improvements,
+        "note": "Token counts are local estimates for comparison, not billing-grade metrics.",
+    }
+
+
 def run_benchmark(
     root: Path,
     store: GraphStore,
@@ -213,6 +279,43 @@ def format_benchmark_suite_markdown(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def format_benchmark_comparison_markdown(result: dict[str, Any]) -> str:
+    lines = [
+        "# CodePrism Benchmark Comparison",
+        "",
+        "Token counts are local estimates for comparison, not billing-grade metrics.",
+        "",
+        f"- Baseline: `{result['baseline']}`",
+        f"- Current: `{result['current']}`",
+        "- Average source-to-slice delta: "
+        f"{_signed(result['average_delta_source_to_slice_saved_percent'])} percentage points",
+        f"- Regression threshold: {result['regression_threshold_percent']:.2f} percentage points",
+        f"- Regressions over threshold: {len(result['regressions'])}",
+        f"- Improvements over threshold: {len(result['improvements'])}",
+        "",
+        "| Fixture | Baseline saving | Current saving | Delta | Baseline slice | Current slice |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for fixture in result["fixtures"]:
+        lines.append(
+            "| "
+            f"{fixture['name']} | "
+            f"{fixture['baseline_source_to_slice_saved_percent']:.2f}% | "
+            f"{fixture['current_source_to_slice_saved_percent']:.2f}% | "
+            f"{_signed(fixture['delta_source_to_slice_saved_percent'])} pp | "
+            f"{fixture['baseline_slice_estimated_tokens']:,} | "
+            f"{fixture['current_slice_estimated_tokens']:,} |"
+        )
+    if result["added_fixtures"]:
+        lines.extend(["", "## Added Fixtures", ""])
+        lines.extend(f"- {name}" for name in result["added_fixtures"])
+    if result["missing_fixtures"]:
+        lines.extend(["", "## Missing Fixtures", ""])
+        lines.extend(f"- {name}" for name in result["missing_fixtures"])
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _read_fixture_config(root: Path) -> dict[str, Any]:
     config_path = root / "benchmark.config.json"
     if not config_path.exists():
@@ -233,6 +336,30 @@ def _suite_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "min_source_to_slice_saved_percent": min(savings),
         "max_source_to_slice_saved_percent": max(savings),
     }
+
+
+def _read_suite_payload(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        raise BenchmarkError(f"Benchmark suite file not found: {path}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise BenchmarkError(f"Invalid benchmark suite JSON {path}: {exc}") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("fixtures"), list):
+        raise BenchmarkError(f"Benchmark suite must contain a fixtures array: {path}")
+    return payload
+
+
+def _fixtures_by_name(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    fixtures: dict[str, dict[str, Any]] = {}
+    for fixture in payload.get("fixtures", []):
+        if isinstance(fixture, dict) and fixture.get("name"):
+            fixtures[str(fixture["name"])] = fixture
+    return fixtures
+
+
+def _signed(value: float) -> str:
+    return f"{value:+.2f}"
 
 
 def _reset_benchmark_db(db: Path) -> None:

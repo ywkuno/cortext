@@ -41,6 +41,7 @@ codeprism stats
 codeprism gain
 codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+codeprism benchmark-compare .codeprism/benchmarks/suite.json .codeprism/benchmarks/suite.json --out .codeprism/benchmarks/comparison.md
 codeprism onboard --notes "Project purpose, build commands, and safety notes."
 codeprism memory read project
 codeprism mcp --list-tools
@@ -102,6 +103,7 @@ Then inspect generated files under `.codeprism/`.
 - `codeprism onboard` and `codeprism memory` manage inspectable local project memory under `.codeprism/memory/`.
 - `codeprism benchmark` writes reproducible JSON savings reports.
 - `codeprism benchmark-suite` writes a cross-fixture JSON report plus Markdown summary table.
+- `codeprism benchmark-compare` compares two suite JSON reports and can fail CI on savings regressions.
 - `codeprism mcp --list-tools` shows the experimental MCP tool surface; `codeprism mcp` needs the optional `.[mcp]` extra.
 - `codeprism slice ...` writes Markdown, a compact `.brief.md`, and a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .codeprism/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
@@ -111,6 +113,7 @@ Then inspect generated files under `.codeprism/`.
 - Dedicated extractors now cover Python, Markdown, JavaScript/TypeScript, and Java; common other languages use a deterministic generic fallback.
 - `docs/community-comparison.md` tracks lessons from GSD, jCodeMunch, LeanCTX, CocoIndex Code, and Graphify.
 - `docs/benchmarks.md` tracks the reproducible public fixture suite and the caveats for estimated token counts.
+- CI uploads benchmark JSON and Markdown reports as workflow artifacts for release review and trend comparisons.
 - `docs/visualization-plan.md` tracks the browser map plan.
 - `docs/pixel-brain-mode.md` and `docs/activity-stream-schema.md` cover the future activity replay layer.
 - `examples/activity-stream.sample.jsonl` is the sample event stream.

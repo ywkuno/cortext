@@ -12,9 +12,11 @@ from .activity_adapters import adapt_tool_jsonl
 from .artifacts import ARTIFACT_DIR, artifact_path, config_path, resolve_artifact_path
 from .benchmark import (
     BenchmarkError,
+    compare_benchmark_suites,
     default_benchmark_path,
     default_benchmark_suite_path,
     format_benchmark,
+    format_benchmark_comparison_markdown,
     format_benchmark_suite,
     run_benchmark,
     run_benchmark_suite,
@@ -56,6 +58,7 @@ PUBLIC_CLI = "codeprism"
 LEGACY_CLI = "contextopt"
 STALE_CONTEXT_EXIT = 3
 LOCK_TIMEOUT_EXIT = 4
+BENCHMARK_REGRESSION_EXIT = 5
 
 
 def _program_name(argv0: str | None = None) -> str:
@@ -144,6 +147,15 @@ def main(argv: list[str] | None = None) -> int:
     p_benchmark_suite.add_argument("--out")
     p_benchmark_suite.add_argument("--max-file-bytes", type=int, default=500_000)
     p_benchmark_suite.add_argument("--ignore", action="append", default=[])
+    p_benchmark_compare = sub.add_parser(
+        "benchmark-compare",
+        help="Compare two benchmark-suite JSON reports.",
+    )
+    p_benchmark_compare.add_argument("baseline")
+    p_benchmark_compare.add_argument("current")
+    p_benchmark_compare.add_argument("--out")
+    p_benchmark_compare.add_argument("--regression-threshold", type=float, default=5.0)
+    p_benchmark_compare.add_argument("--fail-on-regression", action="store_true")
     p_audit_session = sub.add_parser(
         "audit-session",
         help="Audit a local Codex JSONL session for CodePrism usage and context risk.",
@@ -764,6 +776,47 @@ def main(argv: list[str] | None = None) -> int:
                 ],
             },
         )
+        return 0
+    if args.cmd == "benchmark-compare":
+        baseline = Path(args.baseline)
+        current = Path(args.current)
+        try:
+            result = compare_benchmark_suites(
+                baseline,
+                current,
+                regression_threshold_percent=args.regression_threshold,
+            )
+        except BenchmarkError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        text = format_benchmark_comparison_markdown(result)
+        if args.out:
+            out = Path(args.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text, encoding="utf-8")
+            print(f"Wrote benchmark comparison {out}")
+        else:
+            print(text, end="")
+        _trace_event(
+            Path.cwd(),
+            event="benchmark_compare",
+            path=_relative_trace_path(Path(args.out), Path.cwd()) if args.out else None,
+            meta={
+                "baseline": str(baseline),
+                "current": str(current),
+                "regressions": len(result["regressions"]),
+                "average_delta_source_to_slice_saved_percent": result[
+                    "average_delta_source_to_slice_saved_percent"
+                ],
+            },
+        )
+        if args.fail_on_regression and result["regressions"]:
+            print(
+                f"Benchmark regression detected: {len(result['regressions'])} "
+                "fixture(s) crossed the threshold.",
+                file=sys.stderr,
+            )
+            return BENCHMARK_REGRESSION_EXIT
         return 0
     if args.cmd == "audit-session":
         try:
