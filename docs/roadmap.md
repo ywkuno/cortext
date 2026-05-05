@@ -110,6 +110,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - CI uploads benchmark JSON and Markdown reports as artifacts for trend review
 - `scripts/benchmark_trend.py` prepares release benchmark trend reports from either a local baseline suite or a GitHub Actions artifact
 - `scripts/pre_release_proof.py` collects benchmark trend, session audit, test/lint, and public hygiene evidence into a local proof packet
+- `docs/release.md`, `.github/RELEASE_TEMPLATE.md`, and `.github/release.yml` keep public releases consistent and evidence-backed
 - `codeprism audit-session <session>` audits local Codex JSONL sessions for CodePrism adoption timing, raw reads, search commands, compaction mentions, large outputs, and observed savings
 - `codeprism mcp --list-tools` exposes the experimental MCP tool surface; `codeprism mcp` runs the optional SDK-backed server
 - `codeprism setup` installs/refreshes agent helpers and runs `codeprism doctor`

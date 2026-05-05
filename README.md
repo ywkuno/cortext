@@ -343,6 +343,10 @@ codeprism doctor
 
 CI runs tests, Ruff, and a CLI smoke path across Python 3.10, 3.11, and 3.12.
 
+## Release
+
+Use [docs/release.md](docs/release.md) before drafting a public release. It covers the local proof packet, benchmark trend summary, public hygiene scan, and release-note template.
+
 ## Roadmap
 
 Near-term work is focused on improving slice ranking, adding git-diff-aware context, benchmark fixtures for measured token savings, and deepening static extraction without making the tool heavyweight. Visual polish is still planned, but context savings stay the main product. See `docs/roadmap.md` for the current plan.

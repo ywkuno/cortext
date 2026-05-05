@@ -49,3 +49,4 @@ codeprism doctor
 - `src/contextopt/exporters/` — context pack exporters
 - `integrations/` — Claude/Codex/Copilot integration templates
 - `docs/` — design, roadmap, agent handoff
+- `docs/release.md` — public release checklist and proof-pack workflow

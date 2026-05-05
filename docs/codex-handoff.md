@@ -117,6 +117,7 @@ Then inspect generated files under `.codeprism/`.
 - Dedicated extractors now cover Python, Markdown, JavaScript/TypeScript, and Java; common other languages use a deterministic generic fallback.
 - `docs/community-comparison.md` tracks lessons from GSD, jCodeMunch, LeanCTX, CocoIndex Code, and Graphify.
 - `docs/benchmarks.md` tracks the reproducible public fixture suite and the caveats for estimated token counts.
+- `docs/release.md` tracks the public release checklist, release template workflow, proof packet, and benchmark evidence expectations.
 - CI uploads benchmark JSON and Markdown reports as workflow artifacts for release review and trend comparisons.
 - `docs/visualization-plan.md` tracks the browser map plan.
 - `docs/pixel-brain-mode.md` and `docs/activity-stream-schema.md` cover the future activity replay layer.

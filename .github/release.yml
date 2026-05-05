@@ -1,0 +1,38 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+  categories:
+    - title: Breaking Changes
+      labels:
+        - breaking-change
+    - title: Token-Saving Workflow
+      labels:
+        - context
+        - token-efficiency
+        - benchmark
+    - title: Agent Integrations
+      labels:
+        - agent-integration
+        - mcp
+        - codex
+        - claude
+        - copilot
+    - title: Visual Map And Replay
+      labels:
+        - visualization
+        - replay
+    - title: Fixes
+      labels:
+        - bug
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Maintenance
+      labels:
+        - maintenance
+        - ci
+        - chore
+    - title: Other Changes
+      labels:
+        - "*"
