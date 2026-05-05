@@ -91,6 +91,14 @@ These are early local runs on real development repositories. They are meant to s
 
 Actual savings depend on when the agent invokes CodePrism, query scope, file churn, and how much raw source the agent reads outside the map. The best results come from using `codeprism prime` early, then following with targeted `query`, `get`, `references`, and token-aware `read` commands.
 
+To audit whether an agent actually followed that pattern, point CodePrism at a local Codex JSONL session:
+
+```bash
+codeprism audit-session SESSION_ID_OR_JSONL --out .codeprism/session-audit.md
+```
+
+The audit reports CodePrism command timing, raw reads, search commands, compaction mentions, large outputs, and savings observed in the session. It is local-only and reads a session log only when you explicitly pass one.
+
 ## Install From Source
 
 ```bash
@@ -194,6 +202,7 @@ The viewer activity panel includes local event search, run/agent filters, jump-t
 | `codeprism gain` | Report estimated token savings and map freshness. |
 | `codeprism slice <target>` | Export focused Markdown plus a JSON context overlay manifest. |
 | `codeprism benchmark <root>` | Write a reproducible local token-savings report. |
+| `codeprism audit-session <session>` | Audit a local Codex JSONL session for CodePrism adoption and context risk. |
 | `codeprism onboard` | Write local project memory under `.codeprism/memory/`. |
 | `codeprism memory list/read/write` | Manage inspectable local memory files. |
 | `codeprism mcp --list-tools` | List optional MCP tools for agent clients. |

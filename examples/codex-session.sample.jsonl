@@ -1,0 +1,3 @@
+{"type":"response_item","item":{"arguments":{"command":"codeprism prime \"server boot\" --changed"}}}
+{"type":"response_item","item":{"output":"Source estimate: 100,000 tokens.\nSlice estimate: 8,000 tokens.\nEstimated saving: 92.00% vs source.\n"}}
+{"type":"response_item","item":{"arguments":{"command":"codeprism read src/app.py --mode signatures"}}}

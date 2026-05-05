@@ -34,6 +34,7 @@ from .query import query_graph
 from .read_modes import ReadError, format_read_result, read_path
 from .references import ReferencesError, find_references, format_references
 from .retrieval import RetrievalError, format_retrieved_source, retrieve_source
+from .session_audit import SessionAuditError, audit_session, format_session_audit
 from .slicer import (
     DEFAULT_SLICE_MAX_TOKENS,
     MAX_SAFE_SLICE_TOKENS,
@@ -127,6 +128,15 @@ def main(argv: list[str] | None = None) -> int:
     p_benchmark.add_argument("--max-file-bytes", type=int)
     p_benchmark.add_argument("--ignore", action="append", default=[])
     _add_lock_args(p_benchmark)
+    p_audit_session = sub.add_parser(
+        "audit-session",
+        help="Audit a local Codex JSONL session for CodePrism usage and context risk.",
+    )
+    p_audit_session.add_argument("session", help="Session JSONL path or Codex session ID.")
+    p_audit_session.add_argument("--codex-home", help="Override the Codex home directory.")
+    p_audit_session.add_argument("--out", help="Optional report output path.")
+    p_audit_session.add_argument("--format", choices=["text", "json"], default="text")
+    p_audit_session.add_argument("--large-output-chars", type=int, default=32_000)
     p_watch = sub.add_parser("watch", help="Keep the project map fresh with lightweight polling.")
     p_watch.add_argument("root", nargs="?", default=".")
     p_watch.add_argument("--db")
@@ -711,6 +721,29 @@ def main(argv: list[str] | None = None) -> int:
             path=_relative_trace_path(out, root),
             meta={"query": args.query, "out": str(out)},
         )
+        return 0
+    if args.cmd == "audit-session":
+        try:
+            audit = audit_session(
+                args.session,
+                codex_home=Path(args.codex_home).resolve() if args.codex_home else None,
+                large_output_chars=args.large_output_chars,
+            )
+        except SessionAuditError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        text = (
+            json.dumps(audit, indent=2, sort_keys=True) + "\n"
+            if args.format == "json"
+            else format_session_audit(audit)
+        )
+        if args.out:
+            out = Path(args.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text, encoding="utf-8")
+            print(f"Wrote session audit {out}")
+        else:
+            print(text, end="")
         return 0
     if args.cmd == "watch":
         try:

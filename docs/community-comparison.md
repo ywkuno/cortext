@@ -24,7 +24,7 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
    Tools that win do not just generate artifacts. They install skills, commands, MCP servers, hooks, or rules that make agents use the context layer automatically. CodePrism now has helper installs and an experimental MCP entrypoint; next it should document client setup and add resources/prompts.
 
 3. **Visible proof of savings.**
-   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism now has `codeprism gain` and `codeprism benchmark`; next it should add more fixtures before making stronger public claims.
+   LeanCTX shows live gain and benchmark reports. jCodeMunch and Graphify publish token-reduction examples. CodePrism now has `codeprism gain`, `codeprism benchmark`, and `codeprism audit-session`; next it should add more fixtures before making stronger public claims.
 
 4. **Doctor commands.**
    LeanCTX and CocoIndex Code both make diagnostics part of onboarding. CodePrism now has `codeprism doctor` and stale-map reporting in `codeprism gain`; next it should diagnose PATH, CLI version, stale skills, and missing maps.
@@ -62,6 +62,7 @@ The visual map is useful, but the public front should keep context saving as the
 - `codeprism uninstall-integrations`: safe cleanup.
 - `codeprism mcp`: add resources/prompts and client setup docs.
 - `codeprism benchmark fixtures/`: grow reproducible token-saving examples across languages.
+- `codeprism audit-session`: local Codex JSONL audit for adoption timing, raw reads, compaction risk, large outputs, and observed savings.
 - `codeprism watch`: optional local refresh loop for active repos.
 - Compaction-safe `.brief.md` beside each slice: small recovery artifact before the full Markdown slice.
 - Public landing assets: short GIF, before/after token example, and cleaner viewer screenshot.

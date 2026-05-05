@@ -105,6 +105,7 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - `codeprism watch . --once` refreshes only when stale; `codeprism watch .` provides a lightweight polling feedback loop for active sessions
 - `codeprism onboard` and `codeprism memory` create inspectable local project memory
 - `codeprism benchmark` writes reproducible local token-savings reports
+- `codeprism audit-session <session>` audits local Codex JSONL sessions for CodePrism adoption timing, raw reads, search commands, compaction mentions, large outputs, and observed savings
 - `codeprism mcp --list-tools` exposes the experimental MCP tool surface; `codeprism mcp` runs the optional SDK-backed server
 - `codeprism setup` installs/refreshes agent helpers and runs `codeprism doctor`
 - `codeprism doctor` checks whether helper files are present and current
