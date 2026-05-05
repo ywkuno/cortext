@@ -110,6 +110,7 @@ Then inspect generated files under `.codeprism/`.
 - `codeprism doctor` checks installed helper files against bundled templates and returns nonzero when files are missing or stale.
 - Dedicated extractors now cover Python, Markdown, JavaScript/TypeScript, and Java; common other languages use a deterministic generic fallback.
 - `docs/community-comparison.md` tracks lessons from GSD, jCodeMunch, LeanCTX, CocoIndex Code, and Graphify.
+- `docs/benchmarks.md` tracks the reproducible public fixture suite and the caveats for estimated token counts.
 - `docs/visualization-plan.md` tracks the browser map plan.
 - `docs/pixel-brain-mode.md` and `docs/activity-stream-schema.md` cover the future activity replay layer.
 - `examples/activity-stream.sample.jsonl` is the sample event stream.

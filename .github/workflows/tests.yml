@@ -42,6 +42,7 @@ jobs:
           codeprism slice main --out .codeprism/slices/main.md
           codeprism gain
           codeprism benchmark examples/benchmarks/basic-python --query report --out .codeprism/benchmarks/basic-python.json
+          codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
           codeprism onboard --notes "CI smoke onboarding memory."
           codeprism memory list
           codeprism mcp --list-tools
