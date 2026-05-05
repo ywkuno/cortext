@@ -50,3 +50,5 @@ codeprism doctor
 - `integrations/` — Claude/Codex/Copilot integration templates
 - `docs/` — design, roadmap, agent handoff
 - `docs/release.md` — public release checklist and proof-pack workflow
+- `CONTRIBUTING.md` — contribution workflow, benchmark rules, and privacy expectations
+- `SECURITY.md` — security reporting and local-first security policy

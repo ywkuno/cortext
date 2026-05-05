@@ -343,6 +343,12 @@ codeprism doctor
 
 CI runs tests, Ruff, and a CLI smoke path across Python 3.10, 3.11, and 3.12.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, pull request expectations, benchmark guidance, and privacy rules for public issues and fixtures.
+
+Security reports should follow [SECURITY.md](SECURITY.md). Please do not post exploit details, secrets, private source, or raw session logs in public issues.
+
 ## Release
 
 Use [docs/release.md](docs/release.md) before drafting a public release. It covers the local proof packet, benchmark trend summary, public hygiene scan, and release-note template.
