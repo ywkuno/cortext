@@ -52,7 +52,7 @@ To collect a fuller local pre-release proof packet:
 python scripts/pre_release_proof.py --baseline-suite previous-suite.json
 ```
 
-This writes `.codeprism/pre-release/README.md` plus benchmark trend output, sample session audit output, test and lint logs, and a public hygiene scan. If no baseline suite is supplied, the benchmark trend compares the current suite against itself so the command remains fully offline by default.
+This writes `.codeprism/pre-release/README.md`, a machine-readable `.codeprism/pre-release/manifest.json`, benchmark trend output, sample session audit output, test and lint logs, and a public hygiene scan. If no baseline suite is supplied, the benchmark trend compares the current suite against itself so the command remains fully offline by default.
 
 ## Current Fixture Suite
 

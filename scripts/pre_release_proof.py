@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
 import subprocess
 import sys
@@ -168,10 +169,12 @@ def main(argv: list[str] | None = None) -> int:
         }
     )
 
-    summary_path = outdir / "README.md"
-    _write_summary(
-        summary_path,
+    generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    manifest_path = outdir / "manifest.json"
+    _write_manifest(
+        manifest_path,
         results,
+        generated_at=generated_at,
         baseline_suite=baseline_suite,
         current_suite=current_suite,
         trend_report=trend_dir / "comparison.md",
@@ -179,6 +182,22 @@ def main(argv: list[str] | None = None) -> int:
         chart_check=chart_arg_path if not args.skip_chart_check else None,
         audit_report=audit_path,
         hygiene_report=hygiene_path,
+        self_baseline=args.baseline_suite is None,
+    )
+
+    summary_path = outdir / "README.md"
+    _write_summary(
+        summary_path,
+        results,
+        generated_at=generated_at,
+        baseline_suite=baseline_suite,
+        current_suite=current_suite,
+        trend_report=trend_dir / "comparison.md",
+        chart_artifact=chart_artifact,
+        chart_check=chart_arg_path if not args.skip_chart_check else None,
+        audit_report=audit_path,
+        hygiene_report=hygiene_path,
+        manifest=manifest_path,
         self_baseline=args.baseline_suite is None,
     )
 
@@ -322,6 +341,7 @@ def _write_summary(
     path: Path,
     results: Sequence[dict[str, object]],
     *,
+    generated_at: str,
     baseline_suite: Path,
     current_suite: Path,
     trend_report: Path,
@@ -329,12 +349,13 @@ def _write_summary(
     chart_check: Path | None,
     audit_report: Path,
     hygiene_report: Path,
+    manifest: Path,
     self_baseline: bool,
 ) -> None:
     lines = [
         "# CodePrism Pre-Release Proof Pack",
         "",
-        f"Generated: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}",
+        f"Generated: {generated_at}",
         "",
         "## Checks",
         "",
@@ -356,6 +377,7 @@ def _write_summary(
             f"- Benchmark chart: `{chart_artifact}`",
             f"- Session audit: `{audit_report}`",
             f"- Public hygiene scan: `{hygiene_report}`",
+            f"- Machine-readable manifest: `{manifest}`",
         ]
     )
     if chart_check is not None:
@@ -368,6 +390,46 @@ def _write_summary(
             ]
         )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_manifest(
+    path: Path,
+    results: Sequence[dict[str, object]],
+    *,
+    generated_at: str,
+    baseline_suite: Path,
+    current_suite: Path,
+    trend_report: Path,
+    chart_artifact: Path,
+    chart_check: Path | None,
+    audit_report: Path,
+    hygiene_report: Path,
+    self_baseline: bool,
+) -> None:
+    payload = {
+        "schema_version": 1,
+        "generated_at": generated_at,
+        "self_baseline": self_baseline,
+        "checks": [
+            {
+                "name": str(result["name"]),
+                "status": str(result["status"]),
+                "returncode": int(result["returncode"]),
+                "log": str(result["log"]),
+            }
+            for result in results
+        ],
+        "artifacts": {
+            "baseline_suite": str(baseline_suite),
+            "current_suite": str(current_suite),
+            "benchmark_trend": str(trend_report),
+            "benchmark_chart": str(chart_artifact),
+            "checked_in_chart": str(chart_check) if chart_check is not None else None,
+            "session_audit": str(audit_report),
+            "public_hygiene_scan": str(hygiene_report),
+        },
+    }
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _command_parts(value: str | None, default: Sequence[str]) -> list[str]:

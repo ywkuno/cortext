@@ -41,6 +41,7 @@ The proof packet is written to `.codeprism/pre-release/` and includes:
 - pytest log
 - Ruff log
 - public hygiene scan
+- `manifest.json`, a machine-readable summary of checks and artifact paths for release automation
 
 ## Optional Artifact Baseline
 

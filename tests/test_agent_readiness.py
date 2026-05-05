@@ -521,9 +521,18 @@ def test_pre_release_proof_pack_uses_local_checks(tmp_path: Path) -> None:
     assert "benchmark-trend" in summary
     assert "benchmark-chart" in summary
     assert "benchmark-chart-check" in summary
+    assert "Machine-readable manifest" in summary
     assert (outdir / "benchmark-chart.svg").exists()
     assert (outdir / "session-audit.md").exists()
     assert (outdir / "hygiene-scan.md").exists()
+    manifest = json.loads((outdir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == 1
+    assert manifest["artifacts"]["current_suite"].endswith("suite.json")
+    assert {check["name"] for check in manifest["checks"]} >= {
+        "benchmark-suite",
+        "benchmark-trend",
+        "public-hygiene",
+    }
 
 
 def test_mcp_tool_specs_expose_core_context_tools() -> None:
