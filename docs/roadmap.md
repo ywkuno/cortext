@@ -131,6 +131,9 @@ Context saving is the main product direction. Visuals are the inspection and gam
 - Next: improve read signatures with language-aware argument/type summaries where deterministic parsers support them
 - Next: expand MCP resources/prompts and document client setup for Codex, Claude, and other MCP clients
 - Next: add richer reference extraction using deterministic call/reference edges where available
+- Next: add public large-repo comparison fixtures or scripted field-note runs before strengthening external benchmark claims
+- Next: consume `.codeprism/pre-release/manifest.json` in release/trend checks so proof artifacts are machine-verifiable
+- Next: evaluate hook/read guardrails inspired by adjacent tools, while keeping raw file reads possible when explicitly needed
 
 ## Phase 5 — Agent integrations
 
