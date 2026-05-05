@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from html import escape
 from pathlib import Path
 from typing import Any
@@ -22,15 +23,36 @@ def main() -> int:
         default="docs/assets/benchmark-snapshot.svg",
         help="Output SVG path.",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if the output SVG is missing or differs from the rendered chart.",
+    )
     args = parser.parse_args()
 
     suite_path = Path(args.suite_json)
     out_path = Path(args.out)
     payload = json.loads(suite_path.read_text(encoding="utf-8"))
     svg = render_svg(payload)
+    if args.check:
+        return _check_svg(out_path, svg, suite_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(svg, encoding="utf-8")
     print(f"Wrote benchmark chart {out_path}")
+    return 0
+
+
+def _check_svg(out_path: Path, expected_svg: str, suite_path: Path) -> int:
+    if not out_path.exists():
+        print(f"Benchmark chart is missing: {out_path}", file=sys.stderr)
+        print(_regenerate_hint(suite_path, out_path), file=sys.stderr)
+        return 1
+    actual_svg = out_path.read_text(encoding="utf-8")
+    if _normalize_newlines(actual_svg) != _normalize_newlines(expected_svg):
+        print(f"Benchmark chart is stale: {out_path}", file=sys.stderr)
+        print(_regenerate_hint(suite_path, out_path), file=sys.stderr)
+        return 1
+    print(f"Benchmark chart is current: {out_path}")
     return 0
 
 
@@ -248,6 +270,14 @@ def _percent_saved(source_tokens: int, output_tokens: int) -> float:
     if source_tokens <= 0:
         return 0.0
     return max(0.0, min(100.0, (source_tokens - output_tokens) / source_tokens * 100))
+
+
+def _normalize_newlines(value: str) -> str:
+    return value.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _regenerate_hint(suite_path: Path, out_path: Path) -> str:
+    return f"Regenerate with: python scripts/render_benchmark_chart.py {suite_path} --out {out_path}"
 
 
 if __name__ == "__main__":

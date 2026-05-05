@@ -266,6 +266,38 @@ def test_benchmark_chart_renderer_writes_svg(tmp_path: Path) -> None:
     assert "TypeScript Fixture" in svg
     assert "67.50%" in svg
     assert "Token counts are estimates" in svg
+    check = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).parents[1] / "scripts" / "render_benchmark_chart.py"),
+            str(suite),
+            "--out",
+            str(out),
+            "--check",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    out.write_text(svg.replace("67.50%", "66.50%"), encoding="utf-8")
+    stale = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).parents[1] / "scripts" / "render_benchmark_chart.py"),
+            str(suite),
+            "--out",
+            str(out),
+            "--check",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert check.returncode == 0, check.stderr
+    assert "Benchmark chart is current" in check.stdout
+    assert stale.returncode == 1
+    assert "Benchmark chart is stale" in stale.stderr
 
 
 def test_benchmark_compare_reports_regressions_and_can_fail(tmp_path: Path) -> None:
@@ -433,6 +465,34 @@ def test_pre_release_proof_pack_uses_local_checks(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     outdir = tmp_path / "proof"
+    expected_suite = tmp_path / "expected-suite.json"
+    expected_chart = tmp_path / "expected-chart.svg"
+    suite_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "benchmark-suite",
+            str(fixtures),
+            "--out",
+            str(expected_suite),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    chart_result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/render_benchmark_chart.py",
+            str(expected_suite),
+            "--out",
+            str(expected_chart),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     result = subprocess.run(
         [
@@ -445,16 +505,23 @@ def test_pre_release_proof_pack_uses_local_checks(tmp_path: Path) -> None:
             "--outdir",
             str(outdir),
             "--skip-tests",
+            "--chart-out",
+            str(expected_chart),
         ],
         capture_output=True,
         text=True,
         check=False,
     )
 
+    assert suite_result.returncode == 0, suite_result.stderr
+    assert chart_result.returncode == 0, chart_result.stderr
     assert result.returncode == 0, result.stderr
     summary = (outdir / "README.md").read_text(encoding="utf-8")
     assert "All pre-release proof checks passed." in result.stdout
     assert "benchmark-trend" in summary
+    assert "benchmark-chart" in summary
+    assert "benchmark-chart-check" in summary
+    assert (outdir / "benchmark-chart.svg").exists()
     assert (outdir / "session-audit.md").exists()
     assert (outdir / "hygiene-scan.md").exists()
 

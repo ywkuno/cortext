@@ -99,6 +99,7 @@ Run the same suite locally:
 ```bash
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
 python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg
+python scripts/render_benchmark_chart.py .codeprism/benchmarks/suite.json --out docs/assets/benchmark-snapshot.svg --check
 ```
 
 The suite writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`. The chart renderer turns that JSON into the checked-in SVG above. See [docs/benchmarks.md](docs/benchmarks.md) for the full table, caveats, and release-review workflow.
