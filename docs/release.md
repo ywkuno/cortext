@@ -65,6 +65,8 @@ Use `.github/RELEASE_TEMPLATE.md` as the release body starting point. Keep the r
 
 GitHub generated release notes use `.github/release.yml` to group pull requests by category. Edit the generated notes before publishing so the final text stays clear and measured.
 
+If README benchmark copy changes, regenerate the fixture suite first and keep the README snapshot aligned with `docs/benchmarks.md`. Larger real-repo examples may appear as field notes only when they are anonymized and clearly separated from reproducible fixture results.
+
 ## Public Hygiene
 
 Before publishing, confirm the proof packet hygiene scan passed:
