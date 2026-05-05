@@ -5,11 +5,11 @@
 [![Tests](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml/badge.svg)](https://github.com/kunolabs/codeprism/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Local-first context saving for AI coding agents.
+Local-first context saving and focused codebase maps for AI coding agents.
 
-CodePrism gives an agent a task-sized map before it reads your code. It scans files, symbols, imports, routes, docs, and hierarchy into a local graph, then writes focused Markdown slices for the work in front of you.
+CodePrism gives an agent a task-sized map before it reads your code. It scans files, symbols, imports, routes, docs, and hierarchy into a local graph, then writes compact task slices and exact retrieval handles for the work in front of you.
 
-The goal is simple: **map first, slice next, read raw files only when they matter.**
+The goal is simple: **map first, slice next, retrieve exactly, and read raw files only when they matter.** Visuals are there to inspect and replay the map, not to replace the token-saving workflow.
 
 ![CodePrism brain map](docs/assets/cortext-brain-map.png)
 
@@ -78,18 +78,38 @@ The core loop is usable today:
 - inspect/search/filter the visual map as a bonus layer
 - replay safe JSONL activity events
 
-Token counts are local estimates based on text length. They are useful for comparing full-source, graph, context-pack, and slice sizes, but they are not benchmark claims.
+Token counts are local estimates based on text length; the benchmark section below explains how to read them.
 
-## Early Measurements
+## Benchmark Snapshot
 
-These are early local runs on real development repositories. They are meant to show the shape of the workflow, not guarantee identical savings on every project.
+CodePrism token counts are local estimates based on text length. They are useful for comparing source, context-pack, graph, and focused-slice sizes, but they are not billing-grade token measurements.
+
+### Reproducible Fixture Suite
+
+The checked-in fixture suite is the public baseline. It is intentionally small enough for CI and release checks, so it is a conservative proof of the workflow rather than a best-case demo.
+
+| Scope | Languages | Files | Source estimate | Focused slice estimate | Estimated reduction |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 8 checked-in fixtures | Python, TypeScript, Java, Kotlin | 40 | 15,291 tokens | 4,801 tokens | 68.75% average per fixture |
+
+Run the same suite locally:
+
+```bash
+codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
+```
+
+The suite writes per-fixture JSON reports plus `.codeprism/benchmarks/suite.md`. See [docs/benchmarks.md](docs/benchmarks.md) for the full table, caveats, and release-review workflow.
+
+### Field Notes
+
+These are early local runs on real development repositories. They are included to show the shape of the workflow on larger codebases, not to guarantee identical savings on every project.
 
 | Project shape | Source estimate | CodePrism output | Estimated reduction |
 | --- | ---: | ---: | ---: |
 | Java server, 1,040 files | ~2.22M tokens | ~80.7K-token context pack | ~96% smaller |
 | Android app, 197 files | ~351K tokens | ~77.4K-token focused slice | ~78% smaller |
 | Game/tooling repo | ~185K tokens | ~7.5K-token focused slice | ~96% smaller |
-| Large agent-tool repo | ~13.2M tokens | ~8K capped focused slice | ~99% smaller |
+| Large generated/noisy repo | ~13.2M tokens | ~8K capped focused slice | ~99% smaller |
 
 Actual savings depend on when the agent invokes CodePrism, query scope, file churn, and how much raw source the agent reads outside the map. The best results come from using `codeprism prime` early, then following with targeted `query`, `get`, `references`, and token-aware `read` commands.
 
@@ -101,7 +121,7 @@ codeprism audit-session SESSION_ID_OR_JSONL --out .codeprism/session-audit.md
 
 The audit reports CodePrism command timing, raw reads, search commands, compaction mentions, large outputs, and savings observed in the session. It is local-only and reads a session log only when you explicitly pass one.
 
-To reproduce the public fixture table locally:
+To compare fixture output between releases:
 
 ```bash
 codeprism benchmark-suite examples/benchmarks --out .codeprism/benchmarks/suite.json
@@ -114,7 +134,7 @@ The suite command writes per-fixture JSON reports plus `.codeprism/benchmarks/su
 The trend helper wraps the release-review flow. If you omit `--baseline-suite`, it uses the GitHub CLI to download the latest successful benchmark artifact from the public workflow.
 The pre-release proof helper writes a local `.codeprism/pre-release/` packet with benchmark trend output, sample session audit output, test/lint logs, and a public hygiene scan.
 
-Current checked-in fixture suite: 8 Python, TypeScript, Java, and Kotlin fixtures with a 68.75% average estimated source-to-slice reduction. See [docs/benchmarks.md](docs/benchmarks.md) for the full reproducible table and caveats.
+Current checked-in fixture suite: 8 Python, TypeScript, Java, and Kotlin fixtures with a 68.75% average estimated source-to-slice reduction.
 
 ## Install From Source
 

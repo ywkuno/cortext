@@ -1,6 +1,11 @@
 # CodePrism Benchmarks
 
-CodePrism benchmark reports are local, reproducible estimates. They are useful for comparing source, context-pack, and focused-slice sizes, but they are not billing-grade token measurements and should not be read as guarantees for every repository.
+CodePrism benchmark reports are local, reproducible estimates. They are useful for comparing source, context-pack, graph, and focused-slice sizes, but they are not billing-grade token measurements and should not be read as guarantees for every repository.
+
+The public benchmark story has two parts:
+
+- **Fixture suite:** checked-in, reproducible, suitable for CI and release comparisons.
+- **Field notes:** local alpha runs on larger real repositories, useful for product intuition but not treated as release guarantees.
 
 Run the checked-in suite:
 
@@ -44,6 +49,8 @@ This writes `.codeprism/pre-release/README.md` plus benchmark trend output, samp
 
 ## Current Fixture Suite
 
+The current suite covers 8 fixtures across Python, TypeScript, Java, and Kotlin. Across all fixtures it maps 40 files, compares 15,291 estimated source tokens against 4,801 estimated focused-slice tokens, and reports a 68.75% average per-fixture source-to-slice reduction.
+
 | Fixture | Files | Source tokens | Slice tokens | Source -> slice | Source -> context pack |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Basic Java | 5 | 1,126 | 524 | 53.46% | 0.00% |
@@ -67,6 +74,8 @@ Summary:
 The checked-in fixtures are intentionally small so they can run quickly in CI. On tiny projects, graph metadata and slice headers can be a meaningful part of the output, so a context pack or slice can show little or no reduction even when the workflow is behaving correctly.
 
 The real product loop is larger than this table: run `codeprism prime "<task>"`, read the compact brief, then use `query`, `get`, `references`, and `read --mode signatures/diff` before opening raw files. Large repositories and narrow tasks usually show stronger reductions because CodePrism can avoid generated files, repeated shell output, dependency folders, and unrelated source.
+
+When README or release notes mention larger real-world reductions, keep those examples clearly labeled as field notes. Do not mix them into the reproducible fixture average unless the repository, fixture data, and commands are checked in.
 
 ## Fixture Groups
 
