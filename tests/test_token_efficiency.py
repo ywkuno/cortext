@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from contextopt.graph import GraphStore
 from contextopt.gain import compute_gain, format_gain
 from contextopt.mapper import map_project
-from contextopt.slicer import DEFAULT_SLICE_MAX_TOKENS, export_slice
+from contextopt.slicer import DEFAULT_SLICE_MAX_TOKENS, SLICE_BRIEF_MAX_TOKENS, export_slice
 from contextopt.stats import compute_stats
 from contextopt.token_estimator import estimate_tokens
 
@@ -199,3 +200,37 @@ def test_export_slice_ignores_unmapped_seed_paths(tmp_path: Path) -> None:
     )
 
     assert result["seeded_paths"] == ["src/feature.py"]
+
+
+def test_export_slice_writes_compaction_safe_brief(tmp_path: Path) -> None:
+    (tmp_path / "src").mkdir()
+    for index in range(80):
+        (tmp_path / "src" / f"feature_{index}.py").write_text(
+            f"def feature_{index}():\n    return {index}\n",
+            encoding="utf-8",
+        )
+    store = GraphStore(tmp_path / ".contextopt" / "context.db")
+    map_project(tmp_path, store)
+
+    out = tmp_path / ".contextopt" / "slices" / "large.md"
+    result = export_slice(
+        store,
+        "feature",
+        out,
+        limit=80,
+        seed_paths=[f"src/feature_{index}.py" for index in range(80)],
+        max_tokens=500,
+    )
+
+    brief = out.with_name("large.brief.md")
+    brief_text = brief.read_text(encoding="utf-8")
+    manifest = json.loads(out.with_suffix(".json").read_text(encoding="utf-8"))
+
+    assert brief.exists()
+    assert result["brief"] == str(brief)
+    assert result["brief_estimated_tokens"] <= SLICE_BRIEF_MAX_TOKENS
+    assert manifest["brief"] == str(brief)
+    assert manifest["brief_estimated_tokens"] == result["brief_estimated_tokens"]
+    assert "# CodePrism Slice Brief" in brief_text
+    assert "Do not rerun a broad prime only because the conversation compacted." in brief_text
+    assert "Open the full slice only when this brief is insufficient." in brief_text

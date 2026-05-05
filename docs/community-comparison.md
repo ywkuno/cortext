@@ -9,6 +9,11 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
 - [yvgude/lean-ctx](https://github.com/yvgude/lean-ctx)
 - [cocoindex-io/cocoindex-code](https://github.com/cocoindex-io/cocoindex-code)
 - [Graphify](https://github.com/safishamsi/graphify)
+- [oraios/serena](https://github.com/oraios/serena)
+- [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)
+- [Houseofmvps/codesight](https://github.com/Houseofmvps/codesight)
+- [OpenWolf](https://openwolf.com/)
+- [mattpocock/skills grill-me](https://github.com/mattpocock/skills)
 
 ## What The Community Seems To Favor
 
@@ -31,7 +36,13 @@ This note tracks what CodePrism should learn from adjacent public agent-context 
    CocoIndex Code and Graphify emphasize incremental re-indexing. CodePrism already caches unchanged file extraction and reports stale maps; next it needs watch/hook options.
 
 7. **Public polish.**
-   Successful repos have a sharp first screen, badges, screenshots/GIFs, a clear support channel, update/uninstall docs, and sponsor plumbing.
+   Successful repos have a sharp first screen, badges, screenshots/GIFs, clear support links, and update/uninstall docs.
+
+8. **Small resume artifacts.**
+   LeanCTX's rule installs are idempotent, OpenWolf uses a persistent anatomy file before reads, and public subagent-overflow guidance favors file-based result passing instead of pulling long transcripts back into context. CodePrism should treat full slices as inspectable artifacts and provide a tiny slice brief for resumes, compacted conversations, and first reads.
+
+9. **Less always-loaded prose.**
+   Caveman and Grill Me are popular partly because they are simple skills with clear behavioral constraints. CodePrism helper text should be short, operational, and explicit about when not to run `prime`.
 
 ## CodePrism Positioning
 
@@ -52,4 +63,5 @@ The visual map is useful, but the public front should keep context saving as the
 - `codeprism mcp`: add resources/prompts and client setup docs.
 - `codeprism benchmark fixtures/`: grow reproducible token-saving examples across languages.
 - `codeprism watch`: optional local refresh loop for active repos.
+- Compaction-safe `.brief.md` beside each slice: small recovery artifact before the full Markdown slice.
 - Public landing assets: short GIF, before/after token example, and cleaner viewer screenshot.

@@ -31,9 +31,9 @@ For a read-only checkout or external target repo, route artifacts outside the re
 codeprism prime "topic, file, symbol, or bug" --root PATH_TO_REPO --artifact-dir PATH_TO_ARTIFACTS --readonly-root
 ```
 
-2. Read the generated slice Markdown first. By default it is under `.codeprism/slices/`; with `--artifact-dir`, it is under that artifact directory.
+2. Read the generated slice brief first. By default it is under `.codeprism/slices/<name>.brief.md`; with `--artifact-dir`, it is under that artifact directory.
    CodePrism also writes a local Live Trace event to `.codeprism/live-trace.jsonl`, or to `<artifact-dir>/live-trace.jsonl` when `--artifact-dir` is used.
-   If the prime output says the slice was capped, do not dump the full slice into the conversation. Use the slice as an index and move to targeted `query`, `get`, `references`, or `read` commands.
+   Open the full slice only when the slice brief is insufficient. If the prime output says the slice was capped, do not dump the full slice into the conversation. Use the brief as an index and move to targeted `query`, `get`, `references`, or `read` commands.
 3. Use exact retrieval for specific mapped nodes before opening whole raw files:
 
 ```bash
@@ -103,6 +103,6 @@ When `.codeprism/live-trace.jsonl` exists, `codeprism visualize` auto-loads it f
 - Prefer narrow task queries over compound multi-feature queries.
 - Treat `--limit 40` or high `--max-tokens` as exceptional; these can erase the token savings.
 - Never use `--allow-large-context` unless the user explicitly asks for broad context or the current task would fail without it.
-- If a conversation has compacted, do not rerun a broad prime. Report current state and continue with targeted reads.
+- Do not rerun a broad prime only because the conversation compacted. Read the existing slice brief, report current state, and continue with targeted reads.
 - Use `--artifact-dir` and `--readonly-root` when the target repository must stay untouched.
 - Treat Live Trace as a local audit aid, not as proof of exact model billing tokens.

@@ -83,7 +83,9 @@ Then inspect generated files under `.codeprism/`.
 - The static viewer labels this panel Live Trace and uses lightweight SVG/CSS pulse trails, not a heavy canvas loop.
 - MVP4 token workflow starts with `codeprism stats`, `codeprism gain`, `codeprism query`, and `codeprism slice`.
 - `codeprism prime <task>` maps, estimates, and writes a focused slice in one step.
-- `codeprism prime` and `codeprism slice` cap generated Markdown to about 8K estimated tokens by default; capped slices should lead to narrower `query/get/references/read` calls, not automatic budget increases.
+- `codeprism prime` and `codeprism slice` cap generated Markdown to about 8K estimated tokens by default and write a compact `.brief.md` beside the full slice for compaction-safe resumes.
+- After conversation compaction, agents should read the existing slice brief and continue with targeted `query/get/references/read` calls instead of rerunning a broad prime.
+- Capped slices should lead to narrower `query/get/references/read` calls, not automatic budget increases.
 - Slice budgets above 16K, including uncapped output, fail unless the command explicitly includes `--allow-large-context`.
 - `codeprism prime <task> --changed` seeds the slice with changed, staged, and untracked Git files.
 - `codeprism prime <task> --artifact-dir <dir> --readonly-root` routes generated artifacts outside a target repo and refuses root writes.
@@ -99,7 +101,7 @@ Then inspect generated files under `.codeprism/`.
 - `codeprism onboard` and `codeprism memory` manage inspectable local project memory under `.codeprism/memory/`.
 - `codeprism benchmark` writes reproducible JSON savings reports.
 - `codeprism mcp --list-tools` shows the experimental MCP tool surface; `codeprism mcp` needs the optional `.[mcp]` extra.
-- `codeprism slice ...` writes Markdown plus a same-name JSON manifest for viewer context overlays.
+- `codeprism slice ...` writes Markdown, a compact `.brief.md`, and a same-name JSON manifest for viewer context overlays.
 - `codeprism visualize --context .codeprism/slices/<name>.json ...` highlights included nodes and shows slice-vs-full context estimates.
 - `codeprism install-integrations` installs local Codex/Claude/Copilot helpers that steer agents toward `codeprism prime` before broad file reads.
 - `codeprism setup` is the friendly install-and-verify path; it installs helpers and immediately runs `codeprism doctor`.

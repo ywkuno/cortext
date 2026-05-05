@@ -37,6 +37,27 @@ def test_install_global_integrations_copies_codex_and_claude_skills(tmp_path: Pa
     assert result["copied"] == 2
 
 
+def test_integration_templates_are_compaction_safe() -> None:
+    root = Path(__file__).resolve().parents[1]
+    skill = (root / "integrations" / "claude-skill" / "cortext" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    codex_prompt = (root / "integrations" / "codex" / "contextopt-prompt.md").read_text(
+        encoding="utf-8"
+    )
+    claude_slice = (
+        root / "integrations" / "claude-commands" / "context-slice.md"
+    ).read_text(encoding="utf-8")
+    copilot = (root / "integrations" / "copilot" / "copilot-instructions.md").read_text(
+        encoding="utf-8"
+    )
+
+    for template in (skill, codex_prompt, claude_slice, copilot):
+        assert "slice brief" in template.lower()
+        assert "Do not rerun a broad prime only because the conversation compacted." in template
+        assert "Open the full slice only when" in template
+
+
 def test_install_integrations_dry_run_does_not_write(tmp_path: Path) -> None:
     result = install_integrations(
         root=tmp_path,

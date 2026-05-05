@@ -15,6 +15,8 @@ FILE_KINDS = {"file", "doc"}
 SYMBOL_KINDS = {"class", "function", "heading", "method", "route"}
 DEFAULT_SLICE_MAX_TOKENS = 8_000
 MAX_SAFE_SLICE_TOKENS = 16_000
+SLICE_BRIEF_MAX_TOKENS = 1_200
+SLICE_BRIEF_NODE_LIMIT = 12
 
 
 def _node_row_id(row: dict[str, Any]) -> str:
@@ -137,6 +139,10 @@ def default_slice_path(query: str) -> Path:
     return Path(ARTIFACT_DIR) / "slices" / f"{_sanitize_filename(query)}.md"
 
 
+def _brief_path(out: Path) -> Path:
+    return out.with_name(f"{out.stem}.brief.md")
+
+
 def _node_ids_for_paths(
     nodes_by_id: dict[str, dict[str, Any]],
     seed_paths: Sequence[str] | None,
@@ -222,6 +228,141 @@ def _slice_lines(
             ]
         )
     return lines
+
+
+def _brief_node_line(node: dict[str, Any]) -> str:
+    node_id = _node_row_id(node)
+    loc = f":L{node['start_line']}" if node["start_line"] else ""
+    return f"- `{node_id}` — {node['kind']} `{node['path']}{loc}` **{node['name']}**"
+
+
+def _slice_brief_lines(
+    *,
+    query: str,
+    out: Path,
+    manifest_path: Path,
+    matched_count: int,
+    nodes: list[dict[str, Any]],
+    matched_ids: set[str],
+    seeded_paths: list[str],
+    file_count: int,
+    symbol_count: int,
+    edge_count: int,
+    estimated_tokens: int,
+    full_context_tokens: int,
+    max_tokens: int | None,
+    truncated: bool,
+    omitted_node_count: int,
+    omitted_edge_count: int,
+    node_limit: int,
+) -> list[str]:
+    status = (
+        "capped; continue with targeted reads instead of raising the budget"
+        if truncated
+        else "within budget"
+    )
+    lines = [
+        "# CodePrism Slice Brief",
+        "",
+        f"- Query: `{query}`",
+        f"- Full slice: `{out}`",
+        f"- Manifest: `{manifest_path}`",
+        f"- Status: {status}",
+        f"- Matched nodes: {matched_count}",
+        f"- Included: {file_count} files, {symbol_count} symbols, {edge_count} edges",
+        f"- Slice estimate: {estimated_tokens} tokens",
+        f"- Full context estimate: {full_context_tokens} tokens",
+    ]
+    if max_tokens and max_tokens > 0:
+        lines.append(f"- Slice budget: {max_tokens} tokens")
+    if omitted_node_count or omitted_edge_count:
+        lines.append(
+            f"- Omitted from full slice budget: {omitted_node_count} nodes, "
+            f"{omitted_edge_count} edges"
+        )
+    if seeded_paths:
+        sample = ", ".join(f"`{path}`" for path in seeded_paths[:8])
+        suffix = f", +{len(seeded_paths) - 8} more" if len(seeded_paths) > 8 else ""
+        lines.append(f"- Seeded paths: {sample}{suffix}")
+
+    lines.extend(["", "## Start Here", ""])
+    ordered_nodes = _ordered_nodes_for_slice(nodes, matched_ids)
+    for node in ordered_nodes[:node_limit]:
+        lines.append(_brief_node_line(node))
+    if len(ordered_nodes) > node_limit:
+        lines.append(f"- ... {len(ordered_nodes) - node_limit} more nodes in the full slice.")
+    if not ordered_nodes:
+        lines.append("- No nodes were written. Narrow the query or refresh the map.")
+
+    lines.extend(
+        [
+            "",
+            "## Safe Next Reads",
+            "",
+            "- `codeprism get NODE_ID` for exact mapped source.",
+            "- `codeprism references NODE_ID` for incoming and outgoing graph edges.",
+            "- `codeprism read PATH --mode signatures` before opening a whole file.",
+            "- `codeprism read PATH --mode diff` for one-file working-tree changes.",
+            "",
+            "## Compaction Safety",
+            "",
+            "Do not rerun a broad prime only because the conversation compacted.",
+            "Open the full slice only when this brief is insufficient.",
+        ]
+    )
+    return lines
+
+
+def _slice_brief_text(
+    *,
+    query: str,
+    out: Path,
+    manifest_path: Path,
+    matched_count: int,
+    nodes: list[dict[str, Any]],
+    matched_ids: set[str],
+    seeded_paths: list[str],
+    file_count: int,
+    symbol_count: int,
+    edge_count: int,
+    estimated_tokens: int,
+    full_context_tokens: int,
+    max_tokens: int | None,
+    truncated: bool,
+    omitted_node_count: int,
+    omitted_edge_count: int,
+) -> tuple[str, int]:
+    node_limit = min(SLICE_BRIEF_NODE_LIMIT, len(nodes))
+    while node_limit >= 0:
+        text = (
+            "\n".join(
+                _slice_brief_lines(
+                    query=query,
+                    out=out,
+                    manifest_path=manifest_path,
+                    matched_count=matched_count,
+                    nodes=nodes,
+                    matched_ids=matched_ids,
+                    seeded_paths=seeded_paths,
+                    file_count=file_count,
+                    symbol_count=symbol_count,
+                    edge_count=edge_count,
+                    estimated_tokens=estimated_tokens,
+                    full_context_tokens=full_context_tokens,
+                    max_tokens=max_tokens,
+                    truncated=truncated,
+                    omitted_node_count=omitted_node_count,
+                    omitted_edge_count=omitted_edge_count,
+                    node_limit=node_limit,
+                )
+            )
+            + "\n"
+        )
+        token_estimate = estimate_tokens(text)
+        if token_estimate <= SLICE_BRIEF_MAX_TOKENS or node_limit == 0:
+            return text, token_estimate
+        node_limit -= 1
+    raise AssertionError("unreachable")
 
 
 def _fit_slice_budget(
@@ -451,10 +592,31 @@ def export_slice(
     file_count = sum(1 for node in selected_nodes if node["kind"] in FILE_KINDS)
     symbol_count = sum(1 for node in selected_nodes if node["kind"] in SYMBOL_KINDS)
     manifest_path = out.with_suffix(".json")
+    brief_path = _brief_path(out)
+    brief_text, brief_estimated_tokens = _slice_brief_text(
+        query=query,
+        out=out,
+        manifest_path=manifest_path,
+        matched_count=len(matched_ids),
+        nodes=selected_nodes,
+        matched_ids=matched_ids,
+        seeded_paths=normalized_seed_paths,
+        file_count=file_count,
+        symbol_count=symbol_count,
+        edge_count=len(selected_edges),
+        estimated_tokens=estimated_tokens,
+        full_context_tokens=full_context_tokens,
+        max_tokens=max_tokens,
+        truncated=truncated,
+        omitted_node_count=omitted_node_count,
+        omitted_edge_count=omitted_edge_count,
+    )
+    brief_path.write_text(brief_text, encoding="utf-8")
     manifest = {
         "schema_version": 1,
         "query": query,
         "markdown": str(out),
+        "brief": str(brief_path),
         "node_ids": sorted(selected_ids),
         "matched_node_ids": sorted(matched_ids),
         "seeded_paths": normalized_seed_paths,
@@ -465,6 +627,8 @@ def export_slice(
         "full_context_estimated_tokens": full_context_tokens,
         "estimated_token_ratio": ratio,
         "max_tokens": max_tokens,
+        "brief_estimated_tokens": brief_estimated_tokens,
+        "brief_max_tokens": SLICE_BRIEF_MAX_TOKENS,
         "truncated": truncated,
         "untruncated_estimated_tokens": untruncated_estimated_tokens,
         "omitted_node_count": omitted_node_count,
@@ -487,6 +651,9 @@ def export_slice(
         "full_context_estimated_tokens": full_context_tokens,
         "estimated_token_ratio": ratio,
         "max_tokens": max_tokens,
+        "brief": str(brief_path),
+        "brief_estimated_tokens": brief_estimated_tokens,
+        "brief_max_tokens": SLICE_BRIEF_MAX_TOKENS,
         "truncated": truncated,
         "untruncated_estimated_tokens": untruncated_estimated_tokens,
         "omitted_node_count": omitted_node_count,

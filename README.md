@@ -78,6 +78,19 @@ The core loop is usable today:
 
 Token counts are local estimates based on text length. They are useful for comparing full-source, graph, context-pack, and slice sizes, but they are not benchmark claims.
 
+## Early Measurements
+
+These are early local runs on real development repositories. They are meant to show the shape of the workflow, not guarantee identical savings on every project.
+
+| Project shape | Source estimate | CodePrism output | Estimated reduction |
+| --- | ---: | ---: | ---: |
+| Java server, 1,040 files | ~2.22M tokens | ~80.7K-token context pack | ~96% smaller |
+| Android app, 197 files | ~351K tokens | ~77.4K-token focused slice | ~78% smaller |
+| Game/tooling repo | ~185K tokens | ~7.5K-token focused slice | ~96% smaller |
+| Large agent-tool repo | ~13.2M tokens | ~8K capped focused slice | ~99% smaller |
+
+Actual savings depend on when the agent invokes CodePrism, query scope, file churn, and how much raw source the agent reads outside the map. The best results come from using `codeprism prime` early, then following with targeted `query`, `get`, `references`, and token-aware `read` commands.
+
 ## Install From Source
 
 ```bash
@@ -303,7 +316,7 @@ Near-term work is focused on improving slice ranking, adding git-diff-aware cont
 
 ## Support
 
-If CodePrism saves you time or tokens, sponsorship helps fund parser coverage, MCP support, reproducible benchmarks, and public docs. GitHub funding is configured in `.github/FUNDING.yml`; Ko-fi can be enabled there once a public Ko-fi handle is configured.
+If CodePrism saves you time or tokens, sponsorship helps fund parser coverage, MCP support, reproducible benchmarks, and public docs.
 
 ## License
 

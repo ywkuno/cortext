@@ -17,7 +17,7 @@ codeprism init
 codeprism prime "main"
 ```
 
-This creates a local `.codeprism/context.db` SQLite graph and a focused `.codeprism/slices/main.md` file. It also appends a small command event to `.codeprism/live-trace.jsonl`, which the viewer can replay later without reading private agent session logs. Generated `.codeprism/` files are local working artifacts and should not be committed.
+This creates a local `.codeprism/context.db` SQLite graph, a focused `.codeprism/slices/main.md` file, and a compact `.codeprism/slices/main.brief.md` file for first reads and compacted-session resumes. It also appends a small command event to `.codeprism/live-trace.jsonl`, which the viewer can replay later without reading private agent session logs. Generated `.codeprism/` files are local working artifacts and should not be committed.
 
 During an edit session, seed the slice with changed, staged, and untracked Git files:
 
@@ -25,8 +25,8 @@ During an edit session, seed the slice with changed, staged, and untracked Git f
 codeprism prime "current task" --changed
 ```
 
-The command prints source, full-context, and slice token estimates plus an estimated saving percentage.
-The generated Markdown slice is capped to about 8K estimated tokens by default. Budgets above 16K, including uncapped output, require `--allow-large-context`. If the output says the slice was capped, use narrower `codeprism query`, `codeprism get`, `codeprism references`, or `codeprism read --mode signatures/diff` calls instead of immediately raising the budget.
+The command prints source, full-context, slice, and brief token estimates plus an estimated saving percentage.
+The generated Markdown slice is capped to about 8K estimated tokens by default. Budgets above 16K, including uncapped output, require `--allow-large-context`. If the output says the slice was capped, use narrower `codeprism query`, `codeprism get`, `codeprism references`, or `codeprism read --mode signatures/diff` calls instead of immediately raising the budget. Do not rerun a broad prime only because a conversation compacted; read the existing slice brief and continue from its node IDs and paths.
 Map refreshes use a local `context.lock` file beside the graph database, so two agents do not rewrite the same map at once. If you only want to refresh when the map is stale, run:
 
 ```bash
@@ -65,6 +65,7 @@ Restart Codex/Claude after installing global skills. The helpers tell agents to 
 
 The prime/slice workflow writes:
 
+- `.codeprism/slices/main.brief.md` for a compaction-safe first read
 - `.codeprism/slices/main.md` for an assistant-readable context slice
 - `.codeprism/slices/main.json` for the viewer context overlay
 

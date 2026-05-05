@@ -802,10 +802,12 @@ def main(argv: list[str] | None = None) -> int:
             f"({map_result.files_reused} reused, {map_result.files_extracted} extracted)."
         )
         print(f"Wrote slice {slice_result['out']}")
+        print(f"Brief: {slice_result['brief']}")
         print(f"Manifest: {slice_result['manifest']}")
         print(f"Source estimate: {source_tokens} tokens.")
         print(f"Full context estimate: {slice_result['full_context_estimated_tokens']} tokens.")
         print(f"Slice estimate: {slice_tokens} tokens.")
+        print(f"Brief estimate: {slice_result['brief_estimated_tokens']} tokens.")
         print(f"Estimated saving: {saving:.2%} vs source.")
         print(
             f"Included: {slice_result['file_count']} files, "
@@ -818,7 +820,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         if args.changed:
             print(f"Changed files: {len(changed_paths)}")
-        print("Read this slice first, then open only the raw files it identifies.")
+        print("Read this slice brief first, then open only the raw files it identifies.")
         trace_node_id = _first_trace_node_id(slice_result)
         trace_path_value = _path_from_node_id(trace_node_id) or _relative_trace_path(
             Path(slice_result["out"]),
@@ -834,6 +836,7 @@ def main(argv: list[str] | None = None) -> int:
             meta={
                 "query": args.query,
                 "slice_path": str(slice_result["out"]).replace("\\", "/"),
+                "brief_path": str(slice_result["brief"]).replace("\\", "/"),
                 "manifest_path": str(slice_result["manifest"]).replace("\\", "/"),
                 "source_estimated_tokens": source_tokens,
                 "full_context_estimated_tokens": slice_result["full_context_estimated_tokens"],
@@ -877,6 +880,7 @@ def main(argv: list[str] | None = None) -> int:
             f"({result['written_nodes']} nodes, {result['direct_edges']} edges, "
             f"~{result['estimated_tokens']} tokens, "
             f"{result['estimated_token_ratio']:.2%} of full context). "
+            f"Brief: {result['brief']} "
             f"Manifest: {result['manifest']}"
         )
         _trace_event(
@@ -884,7 +888,11 @@ def main(argv: list[str] | None = None) -> int:
             event="slice",
             path=_relative_trace_path(Path(result["out"]), root),
             estimated_tokens=result["estimated_tokens"],
-            meta={"query": args.query, "written_nodes": result["written_nodes"]},
+            meta={
+                "query": args.query,
+                "written_nodes": result["written_nodes"],
+                "brief_path": str(result["brief"]).replace("\\", "/"),
+            },
         )
         return 0
     return 1

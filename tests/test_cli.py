@@ -746,12 +746,49 @@ def test_prime_command_maps_and_writes_slice_first_workflow(tmp_path: Path):
 
     assert result.returncode == 0, result.stderr
     assert (tmp_path / ".codeprism" / "slices" / "billing-webhook.md").exists()
+    assert (tmp_path / ".codeprism" / "slices" / "billing-webhook.brief.md").exists()
     assert (tmp_path / ".codeprism" / "slices" / "billing-webhook.json").exists()
-    assert "Read this slice first" in result.stdout
+    assert "Read this slice brief first" in result.stdout
     assert "Source estimate:" in result.stdout
     assert "Slice estimate:" in result.stdout
     assert "Estimated saving:" in result.stdout
     assert "Included:" in result.stdout
+
+
+def test_prime_writes_and_promotes_compaction_safe_brief(tmp_path: Path):
+    (tmp_path / "app.py").write_text(
+        "def billing_webhook():\n    return 'ok'\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "contextopt.cli",
+            "prime",
+            "billing webhook",
+            "--root",
+            str(tmp_path),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    brief = tmp_path / ".codeprism" / "slices" / "billing-webhook.brief.md"
+    assert brief.exists()
+    assert "Brief:" in result.stdout
+    assert "Read this slice brief first" in result.stdout
+    trace_rows = [
+        json.loads(line)
+        for line in (tmp_path / ".codeprism" / "live-trace.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert trace_rows[-1]["meta"]["brief_path"].endswith("billing-webhook.brief.md")
 
 
 def test_prime_defaults_outputs_under_root_when_called_elsewhere(tmp_path: Path):
