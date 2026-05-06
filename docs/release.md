@@ -43,6 +43,26 @@ The proof packet is written to `.codeprism/pre-release/` and includes:
 - public hygiene scan
 - `manifest.json`, a machine-readable summary of checks and artifact paths for release automation
 
+## External Field-Note Context (Optional)
+
+For release context only, we also track local field-note comparisons against the public repo set in `examples/field-notes/public-repos.json`.
+
+Latest execution (2026-05-06 UTC): all 7 targets passed.
+
+```bash
+python scripts/run_field_notes.py --config examples/field-notes/public-repos.json --repos-root external --fail-on-missing
+```
+
+- Graphify
+- Serena
+- GSD
+- jCodeMunch MCP
+- LeanCTX
+- CocoIndex Code
+- codesight
+
+All seven completed with non-empty slices under the default `--max-tokens 8000` budget. Treat this as product-intuition context, and keep this evidence separate from reproducible fixture claims: `.codeprism/field-notes/summary.md`.
+
 ## Optional Artifact Baseline
 
 If you want to compare the local checkout against the latest successful public workflow artifact, install and authenticate the GitHub CLI, then run:
