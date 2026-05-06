@@ -121,6 +121,10 @@ git push public --tags
 
 If you later need filtering, publish to a dedicated release branch and apply a scripted filter step before pushing to `public`. Until then, this direct mirror keeps public history intact and keeps `origin` as the private source of truth.
 
+### Public branch canonicalization status
+
+On 2026-05-06, the public repository default branch is set to `master`, and `public/main` was archived to `main-archive-2026-05-06` and removed to keep only the canonical public stream.
+
 If `public/main` is still in use on the public platform, keep it as a compatibility or archived branch and point the public default branch to `master` so CI and release checks run from the canonical stream.
 
 ## Public Hygiene
